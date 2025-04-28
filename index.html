@@ -21,7 +21,6 @@
             transition: background-color 0.3s ease;
         }
         
-        /* Style pour la navbar fixe */
         .navbar-fixed {
             position: fixed;
             top: 0;
@@ -31,12 +30,10 @@
             transition: all 0.3s ease;
         }
         
-        /* Ajouter du padding sur le body pour compenser la navbar fixe */
         body.has-fixed-nav {
             padding-top: 60px;
         }
         
-        /* Style pour l'image d'en-tête */
         .hero-image {
             background-image: url('header.png');
             background-size: cover;
@@ -44,16 +41,14 @@
             position: relative;
         }
         .hero-overlay {
-    background-color: rgba(37, 99, 235, 0.3); /* Encore plus réduit */
-    /* ou utiliser une autre teinte de bleu moins intense */
-    /* background-color: rgba(59, 130, 246, 0.4); */ /* Bleu plus clair */
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-}
+            background-color: rgba(37, 99, 235, 0.3);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
         
         .hero-content {
             position: relative;
@@ -62,7 +57,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation -->
     <nav id="navbar" class="bg-blue-700 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center">
@@ -93,7 +87,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section avec image d'arrière-plan -->
     <section id="accueil" class="hero-image text-white py-20">
         <div class="hero-overlay"></div>
         <div class="container mx-auto px-4 flex flex-col md:flex-row items-center hero-content">
@@ -117,7 +110,6 @@
         </div>
     </section>
 
-    <!-- Features -->
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -146,7 +138,6 @@
         </div>
     </section>
 
-    <!-- Services -->
     <section id="services" class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
@@ -206,7 +197,6 @@
         </div>
     </section>
 
-    <!-- À propos -->
     <section id="apropos" class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row items-center">
@@ -241,14 +231,14 @@
         </div>
     </section>
 
-    <!-- Tarifs -->
     <section id="tarifs" class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-2">Nos Tarifs</h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">Des tarifs transparents et compétitifs pour tous nos services de plomberie.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                 <div class="relative bg-white p-6 rounded-lg shadow-md border-2 border-gray-200 hover:shadow-lg hover:border-blue-500 transform transition-all duration-300 hover:-translate-y-1 hover:scale-105 group">
                     <div class="absolute -top-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <span class="bg-blue-500 text-white text-sm font-bold py-1 px-4 rounded-full">ÉCONOMIQUE</span>
@@ -262,7 +252,7 @@
                     <ul class="mb-6 space-y-3">
                         <li class="flex items-start">
                             <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                            <span>Déplacement inclus</span>
+                            <span>Déplacement inclus (50€)</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
@@ -296,7 +286,7 @@
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                            <span>24/7 et jours fériés</span>
+                            <span>24/7 et jours fériés (+189€)</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
@@ -343,7 +333,6 @@
         </div>
     </section>
 
-    <!-- Témoignages -->
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
@@ -412,7 +401,6 @@
         </div>
     </section>
 
-    <!-- Contact -->
     <section id="contact" class="py-16 bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
@@ -442,10 +430,26 @@
                                 <option value="urgence">Dépannage d'urgence</option>
                                 <option value="installation">Installation sanitaire</option>
                                 <option value="fuite">Réparation de fuite</option>
-                                <option value="chauffage">Chauffage</option>
-                                <option value="debouchage">Débouchage</option>
-                                <option value="renovation">Rénovation</option>
+                                <option value="chauffage">Installation/Dépannage chauffage</option>
+                                <option value="climatisation">Climatisation</option>
+                                <option value="chauffe-eau">Installation chauffe-eau</option>
+                                <option value="debouchage">Débouchage canalisation</option>
+                                <option value="renovation">Rénovation salle de bain</option>
+                                <option value="wc">Installation WC</option>
+                                <option value="recherche">Recherche de fuite</option>
+                                <option value="entretien">Entretien plomberie</option>
+                                <option value="autre">Autre service</option>
                             </select>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="date-rdv" class="block text-gray-700 mb-2">Date souhaitée</label>
+                                <input type="date" id="date-rdv" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="heure-rdv" class="block text-gray-700 mb-2">Heure souhaitée</label>
+                                <input type="time" id="heure-rdv" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
                         </div>
                         <div class="mb-4">
                             <label for="message" class="block text-gray-700 mb-2">Message</label>
@@ -509,7 +513,6 @@
         </div>
     </section>
 
-    <!-- Quote Request Modal -->
     <div id="quoteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
@@ -536,12 +539,38 @@
                     <label for="quoteEmail" class="block text-gray-700 mb-2">Email</label>
                     <input type="email" id="quoteEmail" name="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
+                <div class="mb-4">
+                    <label for="quoteService" class="block text-gray-700 mb-2">Type de service</label>
+                    <select id="quoteService" name="serviceDetail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="urgence" data-price="120">Dépannage d'urgence (120€)</option>
+                        <option value="installation">Installation sanitaire</option>
+                        <option value="fuite" data-price="140">Réparation de fuite (140€)</option>
+                        <option value="chauffage">Installation/Dépannage chauffage</option>
+                        <option value="climatisation">Climatisation</option>
+                        <option value="chauffe-eau" data-price="999">Installation chauffe-eau (999€)</option>
+                        <option value="debouchage" data-price="150">Débouchage canalisation (150€)</option>
+                        <option value="renovation">Rénovation salle de bain</option>
+                        <option value="wc" data-price="500">Installation WC (500€)</option>
+                        <option value="recherche" data-price="220">Recherche de fuite (220€)</option>
+                        <option value="entretien">Entretien plomberie</option>
+                        <option value="autre">Autre service</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="quoteDateRdv" class="block text-gray-700 mb-2">Date souhaitée</label>
+                        <input type="date" id="quoteDateRdv" name="dateRdv" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="quoteTimeRdv" class="block text-gray-700 mb-2">Heure souhaitée</label>
+                        <input type="time" id="quoteTimeRdv" name="timeRdv" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
                 <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition w-full">Envoyer</button>
             </form>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="bg-blue-900 text-white py-10">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -617,9 +646,7 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- Scripts -->
     <script>
-        // Menu mobile
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         
@@ -634,7 +661,6 @@
             });
         });
 
-        // Navbar fixed on scroll
         const navbar = document.getElementById('navbar');
         const body = document.body;
         let lastScrollTop = 0;
@@ -646,11 +672,10 @@
                 navbar.classList.add('navbar-fixed');
                 body.classList.add('has-fixed-nav');
                 
-                // Hide navbar when scrolling down, show when scrolling up
                 if (scrollTop > lastScrollTop) {
-                    navbar.style.top = '-70px'; // Hide navbar
+                    navbar.style.top = '-70px';
                 } else {
-                    navbar.style.top = '0'; // Show navbar
+                    navbar.style.top = '0';
                 }
             } else {
                 navbar.classList.remove('navbar-fixed');
@@ -661,7 +686,6 @@
             lastScrollTop = scrollTop;
         });
 
-        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -678,7 +702,6 @@
             });
         });
 
-        // Tarifs hover effects
         document.addEventListener('DOMContentLoaded', function() {
             const tarifCards = document.querySelectorAll('#tarifs .bg-white');
             tarifCards.forEach(card => {
@@ -710,7 +733,6 @@
             });
         });
 
-        // Scroll to top
         const scrollToTopButton = document.getElementById('scroll-to-top');
         window.addEventListener('scroll', function() {
             if (window.pageYOffset > 300) {
@@ -729,7 +751,6 @@
             });
         });
 
-        // Modal functions
         function openQuoteModal(service) {
             document.getElementById('quoteModal').classList.remove('hidden');
             document.getElementById('serviceType').value = service;
@@ -741,7 +762,6 @@
             document.getElementById('quoteForm').reset();
         }
 
-        // Form submission
         document.getElementById('quoteForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -750,52 +770,48 @@
             const address = document.getElementById('quoteAddress').value;
             const email = document.getElementById('quoteEmail').value;
             const service = document.getElementById('serviceType').value;
+            const serviceDetail = document.getElementById('quoteService').value;
+            const dateRdv = document.getElementById('quoteDateRdv').value;
+            const timeRdv = document.getElementById('quoteTimeRdv').value;
 
-            const message = `Demande de devis pour: ${service}\nNom: ${name}\nTéléphone: ${phone}\nAdresse: ${address}\nEmail: ${email}`;
+            const message = `Demande de devis pour: ${service}\nNom: ${name}\nTéléphone: ${phone}\nAdresse: ${address}\nEmail: ${email}\nService détaillé: ${serviceDetail}\nDate souhaitée: ${dateRdv}\nHeure souhaitée: ${timeRdv}`;
 
-            // Detect if mobile device
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             if (isMobile) {
-                // Send SMS
                 window.location.href = `sms:+33622167457?body=${encodeURIComponent(message)}`;
             } else {
-                // Send Email
                 window.location.href = `mailto:mehdi@plomberieexpress.fr?subject=Demande de devis - ${encodeURIComponent(service)}&body=${encodeURIComponent(message)}`;
             }
 
-            // Close modal after submission
             closeQuoteModal();
         });
        
-document.querySelector('section#contact form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-    const service = document.getElementById('service').value;
-    const message = document.getElementById('message').value;
+        document.querySelector('section#contact form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const service = document.getElementById('service').value;
+            const dateRdv = document.getElementById('date-rdv').value || 'Non spécifiée';
+            const heureRdv = document.getElementById('heure-rdv').value || 'Non spécifiée';
+            const message = document.getElementById('message').value;
 
-    const emailBody = `Demande de contact:\nNom: ${name}\nEmail: ${email}\nTéléphone: ${phone}\nService: ${service}\nMessage: ${message}`;
+            const emailBody = `Demande de contact:\nNom: ${name}\nEmail: ${email}\nTéléphone: ${phone}\nService: ${service}\nDate souhaitée: ${dateRdv}\nHeure souhaitée: ${heureRdv}\nMessage: ${message}`;
 
-    // Detect if mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    if (isMobile) {
-        // Send SMS
-        window.location.href = `sms:+33622167457?body=${encodeURIComponent(emailBody)}`;
-    } else {
-        // Send Email
-        window.location.href = `mailto:mehdi@plomberieexpress.fr?subject=Formulaire de contact&body=${encodeURIComponent(emailBody)}`;
-    }
+            if (isMobile) {
+                window.location.href = `sms:+33622167457?body=${encodeURIComponent(emailBody)}`;
+            } else {
+                window.location.href = `mailto:mehdi@plomberieexpress.fr?subject=Formulaire de contact&body=${encodeURIComponent(emailBody)}`;
+            }
 
-    // Réinitialiser le formulaire après envoi
-    this.reset();
-    
-    // Afficher un message de confirmation
-    alert('Votre message a été envoyé. Nous vous contacterons bientôt.');
-});
+            this.reset();
+            
+            alert('Votre message a été envoyé. Nous vous contacterons bientôt.');
+        });
     </script>
 </body>
 </html>
