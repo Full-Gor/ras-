@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAS Plomberie -T'es en panique ? T'as une fuite ? Prends un joint.</title>
+    <title>RAS Plomberie - Services Professionnels de Plomberie à Paris</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,6 +14,211 @@
             --secondary-blue: #3b82f6;
             --accent-blue: #60a5fa;
             --dark-blue: #1e293b;
+        }
+
+        /* Admin Mode Styles */
+        .admin-mode [contenteditable="true"] {
+            outline: 2px dashed rgba(59, 130, 246, 0.5);
+            outline-offset: 4px;
+            cursor: text;
+            transition: all 0.3s ease;
+        }
+
+        .admin-mode [contenteditable="true"]:hover {
+            outline-color: rgba(59, 130, 246, 0.8);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .admin-mode [contenteditable="true"]:focus {
+            outline: 2px solid rgba(59, 130, 246, 1);
+            background-color: rgba(59, 130, 246, 0.08);
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            right: 0;
+        }
+
+        .admin-toolbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-mode .admin-toolbar {
+            display: flex;
+        }
+
+        .admin-btn {
+            padding: 8px 16px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+
+        .admin-btn.danger {
+            background: #ef4444;
+        }
+
+        .admin-btn.danger:hover {
+            background: #dc2626;
+        }
+
+        .admin-btn.success {
+            background: #10b981;
+        }
+
+        .admin-btn.success:hover {
+            background: #059669;
+        }
+
+        .editable-image {
+            position: relative;
+            display: inline-block;
+        }
+
+        .admin-mode .editable-image::after {
+            content: "📷 Cliquer pour changer";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .admin-mode .editable-image:hover::after {
+            opacity: 1;
+        }
+
+        .admin-mode .editable-image img {
+            cursor: pointer;
+            transition: filter 0.3s ease;
+        }
+
+        .admin-mode .editable-image:hover img {
+            filter: brightness(0.7);
+        }
+
+        .admin-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10002;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .image-upload-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            z-index: 10003;
+            display: none;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .image-upload-modal.active {
+            display: block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10002;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .admin-mode .editable-section {
+            position: relative;
+        }
+
+        .admin-mode .editable-section:hover .delete-btn {
+            display: flex;
         }
 
         * {
@@ -201,6 +406,80 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Admin Toolbar -->
+    <div class="admin-toolbar">
+        <span style="font-weight: bold; color: #1e40af;">🔧 MODE ADMIN</span>
+        <button class="admin-btn success" onclick="saveChanges()">💾 Sauvegarder</button>
+        <button class="admin-btn" onclick="resetChanges()">↩️ Annuler</button>
+        <button class="admin-btn" onclick="togglePanel()">⚙️ Options</button>
+        <button class="admin-btn danger" onclick="exitAdminMode()">❌ Quitter</button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <div style="padding: 20px;">
+            <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">Panneau d'administration</h2>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🎨 Gestion des couleurs</h3>
+                <div style="display: grid; gap: 10px;">
+                    <div>
+                        <label style="font-size: 14px;">Couleur principale</label>
+                        <input type="color" id="primaryColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 40px; border-radius: 8px; cursor: pointer;">
+                    </div>
+                    <div>
+                        <label style="font-size: 14px;">Couleur secondaire</label>
+                        <input type="color" id="secondaryColor" value="#3b82f6" onchange="updateColors()" style="width: 100%; height: 40px; border-radius: 8px; cursor: pointer;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">📱 Informations de contact</h3>
+                <div style="display: grid; gap: 10px;">
+                    <input type="text" id="adminPhone" placeholder="Téléphone" value="06 22 16 74 57" style="padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <input type="text" id="adminAddress" placeholder="Adresse" value="31 rue du Maroc, 75019 Paris" style="padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🖼️ Gestion des images</h3>
+                <button class="admin-btn" onclick="showImageManager()" style="width: 100%;">Gérer toutes les images</button>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">💾 Sauvegarde</h3>
+                <button class="admin-btn success" onclick="exportData()" style="width: 100%; margin-bottom: 10px;">📥 Exporter les données</button>
+                <button class="admin-btn" onclick="importData()" style="width: 100%;">📤 Importer les données</button>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🗑️ Actions dangereuses</h3>
+                <button class="admin-btn danger" onclick="resetToDefault()" style="width: 100%;">Réinitialiser tout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div class="modal-overlay" onclick="closeImageModal()"></div>
+    <div class="image-upload-modal">
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">Changer l'image</h3>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 10px;">Option 1: URL de l'image</label>
+            <input type="text" id="imageUrl" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 10px;">Option 2: Uploader une image</label>
+            <input type="file" id="imageFile" accept="image/*" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="admin-btn success" onclick="applyImage()" style="flex: 1;">Appliquer</button>
+            <button class="admin-btn danger" onclick="closeImageModal()" style="flex: 1;">Annuler</button>
+        </div>
+    </div>
+
+    <!-- Admin Notification -->
+    <div id="adminNotification" class="admin-notification"></div>
     <!-- Navigation améliorée -->
     <nav id="navbar" class="gradient-bg text-white shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -241,7 +520,7 @@
             <div class="flex flex-col md:flex-row items-center gap-12">
                 <div class="md:w-1/2 space-y-6">
                     <h1 class="text-5xl md:text-6xl font-bold leading-tight">
-                        T'es en panique ? T'as une fuite ? <span class="text-accent-blue"> Prends un joint.</span>
+                        Services de Plomberie <span class="text-accent-blue">Professionnels</span>
                     </h1>
                     <p class="text-xl text-blue-100">
                         Interventions rapides et efficaces pour tous vos problèmes de plomberie à Paris et en Île-de-France
@@ -830,6 +1109,493 @@
     </div>
 
     <script>
+        // Admin Mode Variables
+        let adminMode = false;
+        let clickCount = 0;
+        let clickTimer = null;
+        let originalContent = {};
+        let currentEditingImage = null;
+
+        // Initialize admin mode detection on RAS title
+        document.addEventListener('DOMContentLoaded', function() {
+            const rasTitle = document.querySelector('.font-bold.text-2xl');
+            if (rasTitle) {
+                rasTitle.style.cursor = 'pointer';
+                rasTitle.addEventListener('click', handleAdminAccess);
+            }
+            
+            // Load saved content if exists
+            loadSavedContent();
+            
+            // Setup editable elements
+            if (localStorage.getItem('adminModeActive') === 'true') {
+                enterAdminMode();
+            }
+        });
+
+        // Handle triple click on RAS title
+        function handleAdminAccess() {
+            clickCount++;
+            
+            if (clickTimer) {
+                clearTimeout(clickTimer);
+            }
+            
+            if (clickCount === 3) {
+                const password = prompt('Entrez le mot de passe admin:');
+                if (password === 'admin123' || password === null || password === '') { // Simple password for demo
+                    enterAdminMode();
+                }
+                clickCount = 0;
+            }
+            
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 500);
+        }
+
+        // Enter Admin Mode
+        function enterAdminMode() {
+            adminMode = true;
+            document.body.classList.add('admin-mode');
+            localStorage.setItem('adminModeActive', 'true');
+            
+            // Make all text content editable
+            makeContentEditable();
+            
+            // Make images clickable for editing
+            makeImagesEditable();
+            
+            // Show notification
+            showNotification('Mode Admin Activé - Cliquez sur n\'importe quel texte pour le modifier');
+            
+            // Save original content for reset
+            saveOriginalContent();
+        }
+
+        // Exit Admin Mode
+        function exitAdminMode() {
+            if (confirm('Voulez-vous vraiment quitter le mode admin?')) {
+                adminMode = false;
+                document.body.classList.remove('admin-mode');
+                localStorage.setItem('adminModeActive', 'false');
+                
+                // Remove editable attributes
+                document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                    el.contentEditable = false;
+                });
+                
+                // Remove image click handlers
+                document.querySelectorAll('.editable-image').forEach(el => {
+                    el.classList.remove('editable-image');
+                });
+                
+                showNotification('Mode Admin Désactivé');
+            }
+        }
+
+        // Make content editable with delete option
+        function makeContentEditable() {
+            // Make sections deletable
+            document.querySelectorAll('section').forEach(section => {
+                if (!section.closest('.admin-panel')) {
+                    section.classList.add('editable-section');
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.onclick = function() {
+                        if (confirm('Supprimer cette section entière?')) {
+                            section.remove();
+                            showNotification('Section supprimée');
+                        }
+                    };
+                    section.style.position = 'relative';
+                    section.appendChild(deleteBtn);
+                }
+            });
+
+            // Make all text content editable
+            const editableSelectors = 'h1, h2, h3, h4, h5, h6, p, li, span, a';
+            document.querySelectorAll(editableSelectors).forEach(el => {
+                if (!el.closest('.admin-toolbar') && 
+                    !el.closest('.admin-panel') && 
+                    !el.closest('.delete-btn') &&
+                    !el.classList.contains('carousel-dot')) {
+                    
+                    // Make editable
+                    el.contentEditable = true;
+                    el.dataset.originalContent = el.innerText;
+                    
+                    // Add individual delete capability for divs
+                    if (el.parentElement && !el.parentElement.querySelector('.element-delete-btn')) {
+                        el.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            if (confirm('Supprimer cet élément?')) {
+                                el.remove();
+                                showNotification('Élément supprimé');
+                            }
+                        });
+                    }
+                    
+                    // Special handling for phone numbers
+                    if (el.tagName === 'A' && el.href.startsWith('tel:')) {
+                        el.addEventListener('input', function() {
+                            const newPhone = this.innerText.replace(/\D/g, '');
+                            this.href = 'tel:+33' + newPhone;
+                            updateAllPhoneNumbers(this.innerText);
+                        });
+                    }
+                }
+            });
+
+            // Make navigation items editable
+            document.querySelectorAll('nav a').forEach(link => {
+                if (!link.closest('.admin-panel')) {
+                    link.contentEditable = true;
+                    link.dataset.originalContent = link.innerText;
+                }
+            });
+
+            // Footer editable
+            document.querySelectorAll('footer *').forEach(el => {
+                if (el.nodeType === 1 && 
+                    !el.closest('.admin-panel') && 
+                    el.innerText && 
+                    el.innerText.trim().length > 0) {
+                    el.contentEditable = true;
+                    el.dataset.originalContent = el.innerText;
+                }
+            });
+        }
+
+        // Update all phone numbers when one is changed
+        function updateAllPhoneNumbers(newPhone) {
+            document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                if (!el.closest('.admin-panel')) {
+                    el.innerText = newPhone;
+                    el.href = 'tel:+33' + newPhone.replace(/\D/g, '');
+                }
+            });
+            // Update admin panel input
+            const adminPhoneInput = document.getElementById('adminPhone');
+            if (adminPhoneInput) {
+                adminPhoneInput.value = newPhone;
+            }
+        }
+
+        // Enhanced image editing with carousel support
+        function makeImagesEditable() {
+            // All images including carousel
+            document.querySelectorAll('img').forEach(img => {
+                if (!img.closest('.admin-toolbar') && 
+                    !img.closest('.admin-panel') &&
+                    !img.src.includes('googlelogo')) { // Don't make Google logo editable
+                    
+                    // Check if already wrapped
+                    if (!img.parentElement.classList.contains('editable-image')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'editable-image';
+                        wrapper.style.position = 'relative';
+                        wrapper.style.display = 'inline-block';
+                        
+                        img.parentNode.insertBefore(wrapper, img);
+                        wrapper.appendChild(img);
+                    }
+                    
+                    img.dataset.originalSrc = img.src;
+                    img.style.cursor = 'pointer';
+                    
+                    img.onclick = function(e) {
+                        if (adminMode) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            currentEditingImage = this;
+                            openImageModal();
+                        }
+                    };
+                    
+                    // Add delete button for images
+                    img.addEventListener('contextmenu', function(e) {
+                        if (adminMode) {
+                            e.preventDefault();
+                            if (confirm('Supprimer cette image?')) {
+                                img.parentElement.remove();
+                                showNotification('Image supprimée');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Add section function
+        function addSection() {
+            const newSection = document.createElement('section');
+            newSection.className = 'py-16 bg-white editable-section';
+            newSection.innerHTML = `
+                <div class="container mx-auto px-4">
+                    <h2 class="text-3xl font-bold mb-4 text-center">Nouvelle Section</h2>
+                    <p class="text-gray-600 text-center">Cliquez pour modifier ce contenu</p>
+                </div>
+            `;
+            
+            const mainElement = document.querySelector('main') || document.body;
+            const footer = document.querySelector('footer');
+            mainElement.insertBefore(newSection, footer);
+            
+            makeContentEditable();
+            showNotification('Nouvelle section ajoutée');
+        }
+
+        // Enhanced admin panel with more options
+        function showAdvancedOptions() {
+            const panel = document.getElementById('adminPanel');
+            if (!panel.querySelector('.advanced-options')) {
+                const advancedDiv = document.createElement('div');
+                advancedDiv.className = 'advanced-options';
+                advancedDiv.innerHTML = `
+                    <div style="padding: 20px; border-top: 2px solid #e5e7eb;">
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">➕ Ajouter du contenu</h3>
+                        <button class="admin-btn" onclick="addSection()" style="width: 100%; margin-bottom: 10px;">Ajouter une section</button>
+                        <button class="admin-btn" onclick="addServiceCard()" style="width: 100%; margin-bottom: 10px;">Ajouter un service</button>
+                        <button class="admin-btn" onclick="addTestimonial()" style="width: 100%;">Ajouter un témoignage</button>
+                    </div>
+                `;
+                panel.querySelector('div').appendChild(advancedDiv);
+            }
+        }
+
+        // Keyboard shortcuts for admin mode
+        document.addEventListener('keydown', function(e) {
+            if (adminMode) {
+                // Ctrl+S to save
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveChanges();
+                }
+                // Ctrl+Z to undo
+                if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    resetChanges();
+                }
+                // ESC to exit admin mode
+                if (e.key === 'Escape') {
+                    exitAdminMode();
+                }
+            }
+        });
+
+        // Auto-save every 60 seconds in admin mode
+        setInterval(() => {
+            if (adminMode) {
+                saveChanges();
+                console.log('Auto-saved at', new Date().toLocaleTimeString());
+            }
+        }, 60000);
+
+        // Save original content
+        function saveOriginalContent() {
+            const content = {};
+            document.querySelectorAll('[contenteditable="true"]').forEach((el, index) => {
+                content['element_' + index] = el.innerText;
+            });
+            originalContent = content;
+        }
+
+        // Save changes to localStorage
+        function saveChanges() {
+            const savedData = {
+                timestamp: new Date().toISOString(),
+                content: {},
+                images: {},
+                colors: {
+                    primary: document.getElementById('primaryColor')?.value || '#1e40af',
+                    secondary: document.getElementById('secondaryColor')?.value || '#3b82f6'
+                },
+                contact: {
+                    phone: document.getElementById('adminPhone')?.value || '06 22 16 74 57',
+                    address: document.getElementById('adminAddress')?.value || '31 rue du Maroc, 75019 Paris'
+                }
+            };
+            
+            // Save all editable content
+            document.querySelectorAll('[contenteditable="true"]').forEach((el, index) => {
+                savedData.content['element_' + index] = {
+                    text: el.innerText,
+                    tag: el.tagName,
+                    className: el.className,
+                    id: el.id
+                };
+            });
+            
+            // Save all images
+            document.querySelectorAll('img').forEach((img, index) => {
+                if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel')) {
+                    savedData.images['img_' + index] = img.src;
+                }
+            });
+            
+            localStorage.setItem('siteContent', JSON.stringify(savedData));
+            showNotification('✅ Modifications sauvegardées avec succès!');
+        }
+
+        // Load saved content
+        function loadSavedContent() {
+            const saved = localStorage.getItem('siteContent');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    
+                    // Restore colors
+                    if (data.colors) {
+                        document.documentElement.style.setProperty('--primary-blue', data.colors.primary);
+                        document.documentElement.style.setProperty('--secondary-blue', data.colors.secondary);
+                    }
+                    
+                    // Restore content
+                    if (data.content) {
+                        Object.keys(data.content).forEach((key, index) => {
+                            const elements = document.querySelectorAll(data.content[key].tag);
+                            if (elements[index]) {
+                                elements[index].innerText = data.content[key].text;
+                            }
+                        });
+                    }
+                    
+                    // Restore images
+                    if (data.images) {
+                        const images = document.querySelectorAll('img');
+                        Object.keys(data.images).forEach((key, index) => {
+                            if (images[index] && !images[index].closest('.admin-toolbar')) {
+                                images[index].src = data.images[key];
+                            }
+                        });
+                    }
+                    
+                    // Restore contact info
+                    if (data.contact) {
+                        document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                            el.innerText = data.contact.phone;
+                            el.href = 'tel:+33' + data.contact.phone.replace(/\D/g, '');
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error loading saved content:', e);
+                }
+            }
+        }
+
+        // Reset changes
+        function resetChanges() {
+            if (confirm('Annuler toutes les modifications non sauvegardées?')) {
+                loadSavedContent();
+                showNotification('↩️ Modifications annulées');
+            }
+        }
+
+        // Reset to default
+        function resetToDefault() {
+            if (confirm('⚠️ ATTENTION: Cela supprimera TOUTES les modifications et restaurera le site original. Continuer?')) {
+                if (confirm('Êtes-vous vraiment sûr? Cette action est irréversible!')) {
+                    localStorage.removeItem('siteContent');
+                    location.reload();
+                }
+            }
+        }
+
+        // Toggle admin panel
+        function togglePanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('active');
+        }
+
+        // Update colors
+        function updateColors() {
+            const primary = document.getElementById('primaryColor').value;
+            const secondary = document.getElementById('secondaryColor').value;
+            document.documentElement.style.setProperty('--primary-blue', primary);
+            document.documentElement.style.setProperty('--secondary-blue', secondary);
+        }
+
+        // Image modal functions
+        function openImageModal() {
+            document.querySelector('.modal-overlay').classList.add('active');
+            document.querySelector('.image-upload-modal').classList.add('active');
+        }
+
+        function closeImageModal() {
+            document.querySelector('.modal-overlay').classList.remove('active');
+            document.querySelector('.image-upload-modal').classList.remove('active');
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('imageFile').value = '';
+        }
+
+        function applyImage() {
+            const urlInput = document.getElementById('imageUrl').value;
+            const fileInput = document.getElementById('imageFile');
+            
+            if (urlInput) {
+                currentEditingImage.src = urlInput;
+                closeImageModal();
+                showNotification('Image mise à jour!');
+            } else if (fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentEditingImage.src = e.target.result;
+                    closeImageModal();
+                    showNotification('Image mise à jour!');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // Export data
+        function exportData() {
+            const data = localStorage.getItem('siteContent') || '{}';
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'site-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            showNotification('📥 Données exportées avec succès!');
+        }
+
+        // Import data
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        localStorage.setItem('siteContent', JSON.stringify(data));
+                        loadSavedContent();
+                        showNotification('📤 Données importées avec succès!');
+                    } catch (error) {
+                        alert('Erreur lors de l\'importation du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('adminNotification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Existing site scripts (menu, carousel, etc.)
         // Menu mobile
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
