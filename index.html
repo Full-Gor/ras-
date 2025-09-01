@@ -1402,12 +1402,12 @@
             originalContent = content;
         }
 
-        // Save changes to localStorage
+        // Save changes to localStorage with better structure
         function saveChanges() {
             const savedData = {
                 timestamp: new Date().toISOString(),
-                content: {},
-                images: {},
+                content: [],
+                images: [],
                 colors: {
                     primary: document.getElementById('primaryColor')?.value || '#1e40af',
                     secondary: document.getElementById('secondaryColor')?.value || '#3b82f6'
@@ -1418,20 +1418,38 @@
                 }
             };
             
-            // Save all editable content
+            // Save all editable content with unique identifiers
             document.querySelectorAll('[contenteditable="true"]').forEach((el, index) => {
-                savedData.content['element_' + index] = {
+                // Create unique identifier based on element position and content
+                const parent = el.parentElement;
+                const siblings = Array.from(parent.children);
+                const elementIndex = siblings.indexOf(el);
+                
+                savedData.content.push({
                     text: el.innerText,
-                    tag: el.tagName,
+                    html: el.innerHTML,
+                    tag: el.tagName.toLowerCase(),
                     className: el.className,
-                    id: el.id
-                };
+                    id: el.id || '',
+                    parentTag: parent.tagName.toLowerCase(),
+                    parentClass: parent.className,
+                    parentId: parent.id || '',
+                    elementIndex: elementIndex,
+                    globalIndex: index
+                });
             });
             
-            // Save all images
+            // Save all images with better identification
             document.querySelectorAll('img').forEach((img, index) => {
-                if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel')) {
-                    savedData.images['img_' + index] = img.src;
+                if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel') && !img.src.includes('googlelogo')) {
+                    const parent = img.parentElement;
+                    savedData.images.push({
+                        src: img.src,
+                        alt: img.alt || '',
+                        className: img.className,
+                        parentClass: parent.className,
+                        index: index
+                    });
                 }
             });
             
@@ -1439,49 +1457,107 @@
             showNotification('✅ Modifications sauvegardées avec succès!');
         }
 
-        // Load saved content
+        // Load saved content with better matching
         function loadSavedContent() {
             const saved = localStorage.getItem('siteContent');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    
-                    // Restore colors
-                    if (data.colors) {
-                        document.documentElement.style.setProperty('--primary-blue', data.colors.primary);
-                        document.documentElement.style.setProperty('--secondary-blue', data.colors.secondary);
+            if (!saved) return;
+            
+            try {
+                const data = JSON.parse(saved);
+                console.log('Loading saved content...', data);
+                
+                // Restore colors
+                if (data.colors) {
+                    document.documentElement.style.setProperty('--primary-blue', data.colors.primary);
+                    document.documentElement.style.setProperty('--secondary-blue', data.colors.secondary);
+                    if (document.getElementById('primaryColor')) {
+                        document.getElementById('primaryColor').value = data.colors.primary;
                     }
-                    
-                    // Restore content
-                    if (data.content) {
-                        Object.keys(data.content).forEach((key, index) => {
-                            const elements = document.querySelectorAll(data.content[key].tag);
-                            if (elements[index]) {
-                                elements[index].innerText = data.content[key].text;
+                    if (document.getElementById('secondaryColor')) {
+                        document.getElementById('secondaryColor').value = data.colors.secondary;
+                    }
+                }
+                
+                // Restore content with better matching
+                if (data.content && data.content.length > 0) {
+                    data.content.forEach(item => {
+                        let element = null;
+                        
+                        // Try to find element by ID first
+                        if (item.id) {
+                            element = document.getElementById(item.id);
+                        }
+                        
+                        // Then try by parent and index
+                        if (!element && item.parentId) {
+                            const parent = document.getElementById(item.parentId);
+                            if (parent) {
+                                const children = parent.querySelectorAll(item.tag);
+                                if (children[item.elementIndex]) {
+                                    element = children[item.elementIndex];
+                                }
                             }
-                        });
-                    }
-                    
-                    // Restore images
-                    if (data.images) {
-                        const images = document.querySelectorAll('img');
-                        Object.keys(data.images).forEach((key, index) => {
-                            if (images[index] && !images[index].closest('.admin-toolbar')) {
-                                images[index].src = data.images[key];
+                        }
+                        
+                        // Try by tag and global index
+                        if (!element) {
+                            const allElements = document.querySelectorAll(item.tag);
+                            if (allElements[item.globalIndex]) {
+                                element = allElements[item.globalIndex];
+                                // Verify it's not in admin panels
+                                if (element.closest('.admin-toolbar') || element.closest('.admin-panel')) {
+                                    element = null;
+                                }
                             }
-                        });
-                    }
-                    
-                    // Restore contact info
-                    if (data.contact) {
-                        document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                        }
+                        
+                        // Apply the saved content
+                        if (element) {
+                            element.innerHTML = item.html || item.text;
+                            console.log('Restored element:', item.tag, item.text.substring(0, 30));
+                        }
+                    });
+                }
+                
+                // Restore images
+                if (data.images && data.images.length > 0) {
+                    const allImages = document.querySelectorAll('img');
+                    data.images.forEach(imgData => {
+                        if (allImages[imgData.index]) {
+                            const img = allImages[imgData.index];
+                            if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel') && !img.src.includes('googlelogo')) {
+                                img.src = imgData.src;
+                                if (imgData.alt) img.alt = imgData.alt;
+                                console.log('Restored image:', imgData.index);
+                            }
+                        }
+                    });
+                }
+                
+                // Restore contact info
+                if (data.contact) {
+                    // Update all phone numbers
+                    document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                        if (!el.closest('.admin-panel')) {
                             el.innerText = data.contact.phone;
                             el.href = 'tel:+33' + data.contact.phone.replace(/\D/g, '');
-                        });
+                        }
+                    });
+                    
+                    // Update admin panel inputs
+                    if (document.getElementById('adminPhone')) {
+                        document.getElementById('adminPhone').value = data.contact.phone;
                     }
-                } catch (e) {
-                    console.error('Error loading saved content:', e);
+                    if (document.getElementById('adminAddress')) {
+                        document.getElementById('adminAddress').value = data.contact.address;
+                    }
                 }
+                
+                console.log('Content loaded successfully!');
+                
+            } catch (e) {
+                console.error('Error loading saved content:', e);
+                showNotification('❌ Erreur lors du chargement des données');
             }
         }
 
