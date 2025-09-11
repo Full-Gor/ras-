@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAS Plomberie - Services Professionnels de Plomberie à Paris</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #3b82f6;
+            --accent-blue: #60a5fa;
+            --dark-blue: #1e293b;
+        }
+
+        /* Admin Mode Styles */
+        .admin-mode [contenteditable="true"] {
+            outline: 2px dashed rgba(59, 130, 246, 0.5);
+            outline-offset: 4px;
+            cursor: text;
+            transition: all 0.3s ease;
+        }
+
+        .admin-mode [contenteditable="true"]:hover {
+            outline-color: rgba(59, 130, 246, 0.8);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .admin-mode [contenteditable="true"]:focus {
+            outline: 2px solid rgba(59, 130, 246, 1);
+            background-color: rgba(59, 130, 246, 0.08);
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            right: 0;
+        }
+
+        .admin-toolbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .admin-mode .admin-toolbar {
+            display: flex;
+        }
+
+        .admin-btn {
+            padding: 8px 16px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+
+        .admin-btn.danger {
+            background: #ef4444;
+        }
+
+        .admin-btn.danger:hover {
+            background: #dc2626;
+        }
+
+        .admin-btn.success {
+            background: #10b981;
+        }
+
+        .admin-btn.success:hover {
+            background: #059669;
+        }
+
+        .editable-image {
+            position: relative;
+            display: inline-block;
+        }
+
+        .admin-mode .editable-image::after {
+            content: "📷 Cliquer pour changer";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .admin-mode .editable-image:hover::after {
+            opacity: 1;
+        }
+
+        .admin-mode .editable-image img {
+            cursor: pointer;
+            transition: filter 0.3s ease;
+        }
+
+        .admin-mode .editable-image:hover img {
+            filter: brightness(0.7);
+        }
+
+        .admin-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10002;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .image-upload-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            z-index: 10003;
+            display: none;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .image-upload-modal.active {
+            display: block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10002;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .admin-mode .editable-section {
+            position: relative;
+        }
+
+        .admin-mode .editable-section:hover .delete-btn {
+            display: flex;
+        }
+
+        * {
+            scroll-behavior: smooth;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .navbar-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            background: rgba(30, 64, 175, 0.98);
+            backdrop-filter: blur(10px);
+        }
+
+        body.has-fixed-nav {
+            padding-top: 60px;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .carousel-slide {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .carousel-slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .carousel-dot {
+            height: 10px;
+            width: 10px;
+            margin: 0 5px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .carousel-dot.active {
+            background-color: white;
+            transform: scale(1.2);
+        }
+
+        .service-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .service-card:hover::before {
+            left: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .price-card {
+            position: relative;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .price-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            z-index: 10;
+        }
+
+        .map-container {
+            height: 400px;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .google-rating {
+            display: inline-block;
+            padding: 0.75rem 1rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .google-rating input {
+            color: #374151;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .google-rating input::placeholder {
+            color: #9ca3af;
+            opacity: 1;
+        }
+
+        .google-rating:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .star-rating {
+            color: #fbbc04;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .floating-cta {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Admin Toolbar -->
+    <div class="admin-toolbar">
+        <span style="font-weight: bold; color: #1e40af;">🔧 MODE ADMIN</span>
+        <button class="admin-btn success" onclick="saveChanges()">💾 Sauvegarder</button>
+        <button class="admin-btn" onclick="resetChanges()">↩️ Annuler</button>
+        <button class="admin-btn" onclick="togglePanel()">⚙️ Options</button>
+        <button class="admin-btn danger" onclick="exitAdminMode()">❌ Quitter</button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <div style="padding: 20px;">
+            <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">Panneau d'administration</h2>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🎨 Gestion des couleurs</h3>
+                <div style="display: grid; gap: 10px;">
+                    <div>
+                        <label style="font-size: 14px;">Couleur principale</label>
+                        <input type="color" id="primaryColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 40px; border-radius: 8px; cursor: pointer;">
+                    </div>
+                    <div>
+                        <label style="font-size: 14px;">Couleur secondaire</label>
+                        <input type="color" id="secondaryColor" value="#3b82f6" onchange="updateColors()" style="width: 100%; height: 40px; border-radius: 8px; cursor: pointer;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">📱 Informations de contact</h3>
+                <div style="display: grid; gap: 10px;">
+                    <input type="text" id="adminPhone" placeholder="Téléphone" value="06 22 16 74 57" style="padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    <input type="text" id="adminAddress" placeholder="Adresse" value="31 rue du Maroc, 75019 Paris" style="padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🖼️ Gestion des images</h3>
+                <button class="admin-btn" onclick="showImageManager()" style="width: 100%;">Gérer toutes les images</button>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">💾 Sauvegarde</h3>
+                <button class="admin-btn success" onclick="exportData()" style="width: 100%; margin-bottom: 10px;">📥 Exporter les données</button>
+                <button class="admin-btn" onclick="importData()" style="width: 100%;">📤 Importer les données</button>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🗑️ Actions dangereuses</h3>
+                <button class="admin-btn danger" onclick="resetToDefault()" style="width: 100%;">Réinitialiser tout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div class="modal-overlay" onclick="closeImageModal()"></div>
+    <div class="image-upload-modal">
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">Changer l'image</h3>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 10px;">Option 1: URL de l'image</label>
+            <input type="text" id="imageUrl" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 10px;">Option 2: Uploader une image</label>
+            <input type="file" id="imageFile" accept="image/*" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="admin-btn success" onclick="applyImage()" style="flex: 1;">Appliquer</button>
+            <button class="admin-btn danger" onclick="closeImageModal()" style="flex: 1;">Annuler</button>
+        </div>
+    </div>
+
+    <!-- Admin Notification -->
+    <div id="adminNotification" class="admin-notification"></div>
+    <!-- Navigation améliorée -->
+    <nav id="navbar" class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-tools text-3xl mr-3 text-accent-blue"></i>
+                <div>
+                    <span class="font-bold text-2xl">RAS</span>
+                    <span class="text-xs block text-blue-200">Plomberie Professionnelle</span>
+                </div>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#accueil" class="hover:text-accent-blue transition font-medium">Accueil</a>
+                <a href="#services" class="hover:text-accent-blue transition font-medium">Services</a>
+                <a href="#apropos" class="hover:text-accent-blue transition font-medium">À propos</a>
+                <a href="#zone-intervention" class="hover:text-accent-blue transition font-medium">Zone d'intervention</a>
+                <a href="#contact" class="hover:text-accent-blue transition font-medium">Contact</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-toggle" class="text-white focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-dark-blue bg-opacity-95">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+                <a href="#accueil" class="block hover:text-accent-blue transition font-medium">Accueil</a>
+                <a href="#services" class="block hover:text-accent-blue transition font-medium">Services</a>
+                <a href="#apropos" class="block hover:text-accent-blue transition font-medium">À propos</a>
+                <a href="#zone-intervention" class="block hover:text-accent-blue transition font-medium">Zone d'intervention</a>
+                <a href="#contact" class="block hover:text-accent-blue transition font-medium">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section avec Carousel -->
+    <section id="accueil" class="hero-section text-white py-20">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2 space-y-6">
+                    <h1 class="text-5xl md:text-6xl font-bold leading-tight">
+                        Services de Plomberie <span class="text-accent-blue">Professionnels</span>
+                    </h1>
+                    <p class="text-xl text-blue-100">
+                        Interventions rapides et efficaces pour tous vos problèmes de plomberie à Paris et en Île-de-France
+                    </p>
+                    
+                    <!-- Google Rating Widget -->
+                    <div class="google-rating mx-auto mb-8">
+                        <div class="flex items-center">
+                            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" class="h-6 mr-2">
+                            <span class="star-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </span>
+                            <span class="ml-2 font-bold text-gray-700">4.8/5</span>
+                            <span class="ml-1 text-gray-500">basé sur 127 avis</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openContactModal()" class="bg-white text-black font-bold py-4 px-8 rounded-full hover:bg-blue-50 transition transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-comments mr-2"></i>Demander un devis
+                        </button>
+                        <a href="tel:+33622167457" class="bg-red-600 text-white font-bold py-4 px-8 rounded-full hover:bg-red-700 transition transform hover:scale-105 shadow-lg text-center">
+                            <i class="fas fa-phone-alt mr-2 animate-pulse"></i>Urgence 24/7
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Carousel -->
+                <div class="md:w-1/2">
+                    <div class="carousel-container bg-white p-2">
+                        <div class="relative h-80">
+                            <div class="carousel-slide active">
+                                <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=400&fit=crop" alt="Plomberie moderne" class="w-full h-full object-cover rounded-lg">
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&h=400&fit=crop" alt="Installation sanitaire" class="w-full h-full object-cover rounded-lg">
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=600&h=400&fit=crop" alt="Réparation professionnelle" class="w-full h-full object-cover rounded-lg">
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <span class="carousel-dot active" onclick="currentSlide(1, 'hero')"></span>
+                            <span class="carousel-dot" onclick="currentSlide(2, 'hero')"></span>
+                            <span class="carousel-dot" onclick="currentSlide(3, 'hero')"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Points forts -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-effect p-8 rounded-2xl text-center transform hover:scale-105 transition">
+                    <div class="text-primary-blue text-5xl mb-4">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Interventions Express</h3>
+                    <p class="text-gray-600">Nous intervenons en urgence sous 30 minutes dans Paris intra-muros</p>
+                </div>
+                <div class="glass-effect p-8 rounded-2xl text-center transform hover:scale-105 transition">
+                    <div class="text-primary-blue text-5xl mb-4">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Artisans Certifiés</h3>
+                    <p class="text-gray-600">Tous nos plombiers sont diplômés et certifiés RGE Qualibat</p>
+                </div>
+                <div class="glass-effect p-8 rounded-2xl text-center transform hover:scale-105 transition">
+                    <div class="text-primary-blue text-5xl mb-4">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Garantie 10 ans</h3>
+                    <p class="text-gray-600">Garantie décennale sur tous nos travaux d'installation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services améliorés -->
+    <section id="services" class="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 text-dark-blue">Nos Services Premium</h2>
+                <p class="text-gray-600 max-w-3xl mx-auto text-lg">
+                    Une gamme complète de services de plomberie pour répondre à tous vos besoins avec excellence et professionnalisme
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="text-primary-blue text-4xl mb-4">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Dépannage d'urgence</h3>
+                    <p class="text-gray-600 mb-6">Fuites, canalisations bouchées, problèmes de chauffe-eau - intervention immédiate 24/7</p>
+                    <button onclick="openContactModal('Dépannage d\'urgence')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
+                        Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
+                    </button>
+                </div>
+                
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="text-primary-blue text-4xl mb-4">
+                        <i class="fas fa-bath"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Salle de bains</h3>
+                    <p class="text-gray-600 mb-6">Rénovation complète, installation de douches italiennes, baignoires et sanitaires haut de gamme</p>
+                    <button onclick="openContactModal('Salle de bains')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
+                        Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
+                    </button>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="text-primary-blue text-4xl mb-4">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Détection de fuites</h3>
+                    <p class="text-gray-600 mb-6">Recherche et réparation de fuites avec caméra thermique et équipements de pointe</p>
+                    <button onclick="openContactModal('Détection de fuites')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
+                        Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
+                    </button>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="text-primary-blue text-4xl mb-4">
+                        <i class="fas fa-temperature-high"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Chauffage & Climatisation</h3>
+                    <p class="text-gray-600 mb-6">Installation et entretien de chaudières, pompes à chaleur et systèmes de climatisation</p>
+                    <button onclick="openContactModal('Chauffage & Climatisation')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
+                        Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
+                    </button>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="text-primary-blue text-4xl mb-4">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Débouchage professionnel</h3>
+                    <p class="text-gray-600 mb-6">Débouchage haute pression, curage de canalisations avec caméra d'inspection</p>
+                    <button onclick="openContactModal('Débouchage')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
+                        Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
+                    </button>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="text-primary-blue text-4xl mb-4">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3 text-dark-blue">Rénovation complète</h3>
+                    <p class="text-gray-600 mb-6">Refonte totale de votre plomberie pour maisons et appartements anciens</p>
+                    <button onclick="openContactModal('Rénovation')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
+                        Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Zone d'intervention avec carte -->
+    <section id="zone-intervention" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 text-dark-blue">Notre Zone d'Intervention</h2>
+                <p class="text-gray-600 max-w-3xl mx-auto text-lg">
+                    Nous intervenons rapidement dans tout Paris et la petite couronne
+                </p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div id="map" class="map-container"></div>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl">
+                        <h3 class="text-2xl font-bold mb-4 text-dark-blue">Intervention rapide garantie</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <span><strong>Paris (75)</strong> - Intervention sous 30 minutes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <span><strong>Hauts-de-Seine (92)</strong> - Intervention sous 45 minutes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <span><strong>Seine-Saint-Denis (93)</strong> - Intervention sous 45 minutes</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                <span><strong>Val-de-Marne (94)</strong> - Intervention sous 1 heure</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-2xl">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-phone-alt text-red-600 text-2xl mr-3"></i>
+                            <h4 class="text-xl font-bold text-dark-blue">Urgence 24/7</h4>
+                        </div>
+                        <p class="text-gray-700 mb-4">Service d'urgence disponible nuits, weekends et jours fériés</p>
+                        <a href="tel:+33622167457" class="inline-block bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition">
+                            <i class="fas fa-phone mr-2"></i>06 22 16 74 57
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- À propos avec carousel -->
+    <section id="apropos" class="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <!-- Carousel About -->
+                    <div class="carousel-container">
+                        <div class="relative h-96">
+                            <div class="carousel-slide active">
+                                <img src="https://images.unsplash.com/photo-1521207418485-99c705420785?w=600&h=400&fit=crop" alt="Notre équipe" class="w-full h-full object-cover">
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=400&fit=crop" alt="Nos installations" class="w-full h-full object-cover">
+                            </div>
+                            <div class="carousel-slide">
+                                <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=400&fit=crop" alt="Notre expertise" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="text-center mt-4 bg-white py-2">
+                            <span class="carousel-dot active" onclick="currentSlide(1, 'about')"></span>
+                            <span class="carousel-dot" onclick="currentSlide(2, 'about')"></span>
+                            <span class="carousel-dot" onclick="currentSlide(3, 'about')"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <h2 class="text-4xl font-bold mb-6 text-dark-blue">L'Excellence au Service de votre Confort</h2>
+                    <p class="text-gray-700 mb-6 text-lg leading-relaxed">
+                        Depuis plus de 15 ans, RAS Plomberie est votre partenaire de confiance pour tous vos besoins en plomberie, chauffage et climatisation. Notre équipe d'experts certifiés s'engage à vous offrir un service d'exception.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-center bg-white p-4 rounded-xl shadow">
+                            <i class="fas fa-trophy text-yellow-500 text-2xl mr-3"></i>
+                            <div>
+                                <span class="font-bold text-2xl text-dark-blue">15+</span>
+                                <p class="text-sm text-gray-600">Années d'expérience</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center bg-white p-4 rounded-xl shadow">
+                            <i class="fas fa-users text-blue-500 text-2xl mr-3"></i>
+                            <div>
+                                <span class="font-bold text-2xl text-dark-blue">5000+</span>
+                                <p class="text-sm text-gray-600">Clients satisfaits</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center bg-white p-4 rounded-xl shadow">
+                            <i class="fas fa-certificate text-green-500 text-2xl mr-3"></i>
+                            <div>
+                                <span class="font-bold text-2xl text-dark-blue">100%</span>
+                                <p class="text-sm text-gray-600">Certifié RGE</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center bg-white p-4 rounded-xl shadow">
+                            <i class="fas fa-clock text-red-500 text-2xl mr-3"></i>
+                            <div>
+                                <span class="font-bold text-2xl text-dark-blue">24/7</span>
+                                <p class="text-sm text-gray-600">Disponibilité</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="openContactModal()" class="gradient-bg text-white font-bold py-4 px-8 rounded-full hover:shadow-lg transition transform hover:scale-105">
+                        <i class="fas fa-handshake mr-2"></i>Contactez-nous
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Témoignages -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 text-dark-blue">Ils nous font confiance</h2>
+                <div class="google-rating mx-auto mb-8">
+                    <div class="flex items-center">
+                        <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" class="h-6 mr-2">
+                        <span class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </span>
+                        <span class="ml-2 font-bold text-gray-700">4.8/5</span>
+                        <span class="ml-1 text-gray-500">basé sur 127 avis</span>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="testimonial-card">
+                    <div class="flex mb-4">
+                        <span class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </span>
+                    </div>
+                    <p class="text-gray-700 mb-6 italic">
+                        "Service impeccable ! Intervention rapide suite à une fuite d'eau importante. Le plombier était professionnel et a tout réparé en moins d'une heure."
+                    </p>
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                            <span class="font-bold text-white">ML</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-dark-blue">Marie L.</h4>
+                            <p class="text-sm text-gray-500">Paris 11ème</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="flex mb-4">
+                        <span class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </span>
+                    </div>
+                    <p class="text-gray-700 mb-6 italic">
+                        "Installation complète de ma nouvelle salle de bain. Travail soigné, respect des délais et excellents conseils. Je recommande vivement !"
+                    </p>
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-green-500 to-teal-500 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                            <span class="font-bold text-white">TR</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-dark-blue">Thomas R.</h4>
+                            <p class="text-sm text-gray-500">Neuilly-sur-Seine</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="flex mb-4">
+                        <span class="star-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </span>
+                    </div>
+                    <p class="text-gray-700 mb-6 italic">
+                        "Urgence un dimanche soir, canalisation bouchée. Intervention rapide et efficace. Tarif transparent communiqué à l'avance. Parfait !"
+                    </p>
+                    <div class="flex items-center">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                            <span class="font-bold text-white">SB</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-dark-blue">Sophie B.</h4>
+                            <p class="text-sm text-gray-500">Boulogne-Billancourt</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 text-dark-blue">Contactez-nous</h2>
+                <p class="text-gray-600 max-w-3xl mx-auto text-lg">
+                    Besoin d'un devis ou d'une intervention ? Notre équipe est à votre écoute
+                </p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <h3 class="text-2xl font-bold mb-6 text-dark-blue">Demande de devis gratuit</h3>
+                    <form id="contactForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2 font-medium">Prénom</label>
+                                <input type="text" id="name" placeholder="Votre prénom" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800 placeholder-gray-500" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2 font-medium">Téléphone</label>
+                                <input type="tel" id="phone" placeholder="06 12 34 56 78" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800 placeholder-gray-500" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2 font-medium">Adresse</label>
+                            <input type="text" id="address" placeholder="Votre adresse complète" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800 placeholder-gray-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2 font-medium">Type de service</label>
+                            <select id="service" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800" required>
+                                <option value="" class="text-gray-500">Sélectionnez un service</option>
+                                <option value="urgence" class="text-gray-800">Dépannage urgent</option>
+                                <option value="fuite" class="text-gray-800">Réparation de fuite</option>
+                                <option value="debouchage" class="text-gray-800">Débouchage</option>
+                                <option value="chauffage" class="text-gray-800">Chauffage/Climatisation</option>
+                                <option value="salle-de-bain" class="text-gray-800">Rénovation salle de bain</option>
+                                <option value="installation" class="text-gray-800">Installation sanitaire</option>
+                                <option value="autre" class="text-gray-800">Autre demande</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 mb-2 font-medium">Date souhaitée</label>
+                                <input type="date" id="date" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2 font-medium">Heure préférée</label>
+                                <input type="time" id="time" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800">
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2 font-medium">Message (optionnel)</label>
+                            <textarea id="message" rows="4" placeholder="Décrivez votre problème ou votre demande..." class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800 placeholder-gray-500"></textarea>
+                        </div>
+                        <button type="submit" class="w-full gradient-bg text-white font-bold py-4 rounded-xl hover:shadow-lg transition transform hover:scale-105">
+                            <i class="fas fa-paper-plane mr-2"></i>Envoyer la demande
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-xl">
+                        <h3 class="text-2xl font-bold mb-6 text-dark-blue">Informations de contact</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="text-primary-blue mr-4 mt-1">
+                                    <i class="fas fa-map-marker-alt text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Adresse</h4>
+                                    <p class="text-gray-600">31 rue du Maroc, 75019 Paris</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="text-primary-blue mr-4 mt-1">
+                                    <i class="fas fa-phone-alt text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Téléphone</h4>
+                                    <p class="text-gray-600">Standard : 06 22 16 74 57</p>
+                                    <p class="text-red-600 font-bold">Urgence 24/7 : 06 22 16 74 57</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="text-primary-blue mr-4 mt-1">
+                                    <i class="fas fa-clock text-2xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Horaires</h4>
+                                    <p class="text-gray-600">Lun - Ven : 8h00 - 19h00</p>
+                                    <p class="text-gray-600">Samedi : 9h00 - 17h00</p>
+                                    <p class="text-red-600 font-bold">Urgences : 24h/24, 7j/7</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-red-500 to-orange-500 p-8 rounded-2xl text-white">
+                        <h3 class="text-2xl font-bold mb-4">Urgence ?</h3>
+                        <p class="mb-6">Ne perdez pas de temps ! Appelez-nous immédiatement pour une intervention rapide.</p>
+                        <a href="tel:+33622167457" class="inline-block bg-white text-red-600 font-bold py-4 px-8 rounded-full hover:shadow-lg transition transform hover:scale-105">
+                            <i class="fas fa-phone-alt mr-2 animate-pulse"></i>06 22 16 74 57
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-tools text-3xl mr-3 text-accent-blue"></i>
+                        <span class="font-bold text-2xl">RAS Plomberie</span>
+                    </div>
+                    <p class="text-blue-200 mb-4">Votre expert en plomberie, chauffage et climatisation depuis plus de 15 ans.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-white hover:text-accent-blue transition text-xl">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="text-white hover:text-accent-blue transition text-xl">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-white hover:text-accent-blue transition text-xl">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#services" class="text-blue-200 hover:text-white transition">Dépannage urgent</a></li>
+                        <li><a href="#services" class="text-blue-200 hover:text-white transition">Chauffage</a></li>
+                        <li><a href="#services" class="text-blue-200 hover:text-white transition">Salle de bains</a></li>
+                        <li><a href="#services" class="text-blue-200 hover:text-white transition">Débouchage</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4">Informations</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Mentions légales</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">CGV</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Politique de confidentialité</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-white transition">Plan du site</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-xl font-bold mb-4">Contact rapide</h4>
+                    <a href="tel:+33622167457" class="inline-block bg-white text-black font-bold py-3 px-6 rounded-full hover:bg-blue-50 transition mb-4">
+                        <i class="fas fa-phone mr-2"></i>06 22 16 74 57
+                    </a>
+                    <p class="text-blue-200">31 rue du Maroc<br>75019 Paris</p>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-blue-600 text-center">
+                <p class="text-blue-200">© 2025 RAS Plomberie. Tous droits réservés. | Créé avec passion pour votre confort</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bouton flottant WhatsApp -->
+    <div class="floating-cta">
+        <a href="https://wa.me/33622167457" target="_blank" class="bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition block">
+            <i class="fab fa-whatsapp text-3xl"></i>
+        </a>
+    </div>
+
+    <!-- Modal de contact -->
+    <div id="contactModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-dark-blue">Demande rapide</h3>
+                <button onclick="closeContactModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="quickContactForm">
+                <input type="hidden" id="serviceType">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2 font-medium">Prénom</label>
+                    <input type="text" placeholder="Votre prénom" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800 placeholder-gray-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2 font-medium">Téléphone</label>
+                    <input type="tel" placeholder="06 12 34 56 78" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800 placeholder-gray-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2 font-medium">Service souhaité</label>
+                    <select class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-primary-blue transition bg-white text-gray-800" required>
+                        <option value="" class="text-gray-500">Sélectionnez un service...</option>
+                        <option value="urgence" class="text-gray-800">Urgence plomberie</option>
+                        <option value="devis" class="text-gray-800">Demande de devis</option>
+                        <option value="rdv" class="text-gray-800">Prise de rendez-vous</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full gradient-bg text-white font-bold py-4 rounded-xl hover:shadow-lg transition">
+                    Envoyer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Admin Mode Variables
+        let adminMode = false;
+        let clickCount = 0;
+        let clickTimer = null;
+        let originalContent = {};
+        let currentEditingImage = null;
+
+        // Initialize admin mode detection on RAS title
+        document.addEventListener('DOMContentLoaded', function() {
+            const rasTitle = document.querySelector('.font-bold.text-2xl');
+            if (rasTitle) {
+                rasTitle.style.cursor = 'pointer';
+                rasTitle.addEventListener('click', handleAdminAccess);
+            }
+            
+            // Load saved content if exists
+            loadSavedContent();
+            
+            // Setup editable elements
+            if (localStorage.getItem('adminModeActive') === 'true') {
+                enterAdminMode();
+            }
+        });
+
+        // Handle triple click on RAS title
+        function handleAdminAccess() {
+            clickCount++;
+            
+            if (clickTimer) {
+                clearTimeout(clickTimer);
+            }
+            
+            if (clickCount === 3) {
+                const password = prompt('Entrez le mot de passe admin:');
+                if (password === 'admin123' || password === null || password === '') { // Simple password for demo
+                    enterAdminMode();
+                }
+                clickCount = 0;
+            }
+            
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 500);
+        }
+
+        // Enter Admin Mode
+        function enterAdminMode() {
+            adminMode = true;
+            document.body.classList.add('admin-mode');
+            localStorage.setItem('adminModeActive', 'true');
+            
+            // Make all text content editable
+            makeContentEditable();
+            
+            // Make images clickable for editing
+            makeImagesEditable();
+            
+            // Show notification
+            showNotification('Mode Admin Activé - Cliquez sur n\'importe quel texte pour le modifier');
+            
+            // Save original content for reset
+            saveOriginalContent();
+        }
+
+        // Exit Admin Mode
+        function exitAdminMode() {
+            if (confirm('Voulez-vous vraiment quitter le mode admin?')) {
+                adminMode = false;
+                document.body.classList.remove('admin-mode');
+                localStorage.setItem('adminModeActive', 'false');
+                
+                // Remove editable attributes
+                document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                    el.contentEditable = false;
+                });
+                
+                // Remove image click handlers
+                document.querySelectorAll('.editable-image').forEach(el => {
+                    el.classList.remove('editable-image');
+                });
+                
+                showNotification('Mode Admin Désactivé');
+            }
+        }
+
+        // Make content editable with delete option
+        function makeContentEditable() {
+            // Make sections deletable
+            document.querySelectorAll('section').forEach(section => {
+                if (!section.closest('.admin-panel')) {
+                    section.classList.add('editable-section');
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.onclick = function() {
+                        if (confirm('Supprimer cette section entière?')) {
+                            section.remove();
+                            showNotification('Section supprimée');
+                        }
+                    };
+                    section.style.position = 'relative';
+                    section.appendChild(deleteBtn);
+                }
+            });
+
+            // Make all text content editable
+            const editableSelectors = 'h1, h2, h3, h4, h5, h6, p, li, span, a';
+            document.querySelectorAll(editableSelectors).forEach(el => {
+                if (!el.closest('.admin-toolbar') && 
+                    !el.closest('.admin-panel') && 
+                    !el.closest('.delete-btn') &&
+                    !el.classList.contains('carousel-dot')) {
+                    
+                    // Make editable
+                    el.contentEditable = true;
+                    el.dataset.originalContent = el.innerText;
+                    
+                    // Add individual delete capability for divs
+                    if (el.parentElement && !el.parentElement.querySelector('.element-delete-btn')) {
+                        el.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            if (confirm('Supprimer cet élément?')) {
+                                el.remove();
+                                showNotification('Élément supprimé');
+                            }
+                        });
+                    }
+                    
+                    // Special handling for phone numbers
+                    if (el.tagName === 'A' && el.href.startsWith('tel:')) {
+                        el.addEventListener('input', function() {
+                            const newPhone = this.innerText.replace(/\D/g, '');
+                            this.href = 'tel:+33' + newPhone;
+                            updateAllPhoneNumbers(this.innerText);
+                        });
+                    }
+                }
+            });
+
+            // Make navigation items editable
+            document.querySelectorAll('nav a').forEach(link => {
+                if (!link.closest('.admin-panel')) {
+                    link.contentEditable = true;
+                    link.dataset.originalContent = link.innerText;
+                }
+            });
+
+            // Footer editable
+            document.querySelectorAll('footer *').forEach(el => {
+                if (el.nodeType === 1 && 
+                    !el.closest('.admin-panel') && 
+                    el.innerText && 
+                    el.innerText.trim().length > 0) {
+                    el.contentEditable = true;
+                    el.dataset.originalContent = el.innerText;
+                }
+            });
+        }
+
+        // Update all phone numbers when one is changed
+        function updateAllPhoneNumbers(newPhone) {
+            document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                if (!el.closest('.admin-panel')) {
+                    el.innerText = newPhone;
+                    el.href = 'tel:+33' + newPhone.replace(/\D/g, '');
+                }
+            });
+            // Update admin panel input
+            const adminPhoneInput = document.getElementById('adminPhone');
+            if (adminPhoneInput) {
+                adminPhoneInput.value = newPhone;
+            }
+        }
+
+        // Enhanced image editing with carousel support
+        function makeImagesEditable() {
+            // All images including carousel
+            document.querySelectorAll('img').forEach(img => {
+                if (!img.closest('.admin-toolbar') && 
+                    !img.closest('.admin-panel') &&
+                    !img.src.includes('googlelogo')) { // Don't make Google logo editable
+                    
+                    // Check if already wrapped
+                    if (!img.parentElement.classList.contains('editable-image')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'editable-image';
+                        wrapper.style.position = 'relative';
+                        wrapper.style.display = 'inline-block';
+                        
+                        img.parentNode.insertBefore(wrapper, img);
+                        wrapper.appendChild(img);
+                    }
+                    
+                    img.dataset.originalSrc = img.src;
+                    img.style.cursor = 'pointer';
+                    
+                    img.onclick = function(e) {
+                        if (adminMode) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            currentEditingImage = this;
+                            openImageModal();
+                        }
+                    };
+                    
+                    // Add delete button for images
+                    img.addEventListener('contextmenu', function(e) {
+                        if (adminMode) {
+                            e.preventDefault();
+                            if (confirm('Supprimer cette image?')) {
+                                img.parentElement.remove();
+                                showNotification('Image supprimée');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Add section function
+        function addSection() {
+            const newSection = document.createElement('section');
+            newSection.className = 'py-16 bg-white editable-section';
+            newSection.innerHTML = `
+                <div class="container mx-auto px-4">
+                    <h2 class="text-3xl font-bold mb-4 text-center">Nouvelle Section</h2>
+                    <p class="text-gray-600 text-center">Cliquez pour modifier ce contenu</p>
+                </div>
+            `;
+            
+            const mainElement = document.querySelector('main') || document.body;
+            const footer = document.querySelector('footer');
+            mainElement.insertBefore(newSection, footer);
+            
+            makeContentEditable();
+            showNotification('Nouvelle section ajoutée');
+        }
+
+        // Enhanced admin panel with more options
+        function showAdvancedOptions() {
+            const panel = document.getElementById('adminPanel');
+            if (!panel.querySelector('.advanced-options')) {
+                const advancedDiv = document.createElement('div');
+                advancedDiv.className = 'advanced-options';
+                advancedDiv.innerHTML = `
+                    <div style="padding: 20px; border-top: 2px solid #e5e7eb;">
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">➕ Ajouter du contenu</h3>
+                        <button class="admin-btn" onclick="addSection()" style="width: 100%; margin-bottom: 10px;">Ajouter une section</button>
+                        <button class="admin-btn" onclick="addServiceCard()" style="width: 100%; margin-bottom: 10px;">Ajouter un service</button>
+                        <button class="admin-btn" onclick="addTestimonial()" style="width: 100%;">Ajouter un témoignage</button>
+                    </div>
+                `;
+                panel.querySelector('div').appendChild(advancedDiv);
+            }
+        }
+
+        // Keyboard shortcuts for admin mode
+        document.addEventListener('keydown', function(e) {
+            if (adminMode) {
+                // Ctrl+S to save
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    saveChanges();
+                }
+                // Ctrl+Z to undo
+                if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    resetChanges();
+                }
+                // ESC to exit admin mode
+                if (e.key === 'Escape') {
+                    exitAdminMode();
+                }
+            }
+        });
+
+        // Auto-save every 60 seconds in admin mode
+        setInterval(() => {
+            if (adminMode) {
+                saveChanges();
+                console.log('Auto-saved at', new Date().toLocaleTimeString());
+            }
+        }, 60000);
+
+        // Save original content
+        function saveOriginalContent() {
+            const content = {};
+            document.querySelectorAll('[contenteditable="true"]').forEach((el, index) => {
+                content['element_' + index] = el.innerText;
+            });
+            originalContent = content;
+        }
+
+        // Save changes to localStorage with better structure
+        function saveChanges() {
+            const savedData = {
+                timestamp: new Date().toISOString(),
+                content: [],
+                images: [],
+                colors: {
+                    primary: document.getElementById('primaryColor')?.value || '#1e40af',
+                    secondary: document.getElementById('secondaryColor')?.value || '#3b82f6'
+                },
+                contact: {
+                    phone: document.getElementById('adminPhone')?.value || '06 22 16 74 57',
+                    address: document.getElementById('adminAddress')?.value || '31 rue du Maroc, 75019 Paris'
+                }
+            };
+            
+            // Save all editable content with unique identifiers
+            document.querySelectorAll('[contenteditable="true"]').forEach((el, index) => {
+                // Create unique identifier based on element position and content
+                const parent = el.parentElement;
+                const siblings = Array.from(parent.children);
+                const elementIndex = siblings.indexOf(el);
+                
+                savedData.content.push({
+                    text: el.innerText,
+                    html: el.innerHTML,
+                    tag: el.tagName.toLowerCase(),
+                    className: el.className,
+                    id: el.id || '',
+                    parentTag: parent.tagName.toLowerCase(),
+                    parentClass: parent.className,
+                    parentId: parent.id || '',
+                    elementIndex: elementIndex,
+                    globalIndex: index
+                });
+            });
+            
+            // Save all images with better identification
+            document.querySelectorAll('img').forEach((img, index) => {
+                if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel') && !img.src.includes('googlelogo')) {
+                    const parent = img.parentElement;
+                    savedData.images.push({
+                        src: img.src,
+                        alt: img.alt || '',
+                        className: img.className,
+                        parentClass: parent.className,
+                        index: index
+                    });
+                }
+            });
+            
+            localStorage.setItem('siteContent', JSON.stringify(savedData));
+            showNotification('✅ Modifications sauvegardées avec succès!');
+        }
+
+        // Load saved content with better matching
+        function loadSavedContent() {
+            const saved = localStorage.getItem('siteContent');
+            if (!saved) return;
+            
+            try {
+                const data = JSON.parse(saved);
+                console.log('Loading saved content...', data);
+                
+                // Restore colors
+                if (data.colors) {
+                    document.documentElement.style.setProperty('--primary-blue', data.colors.primary);
+                    document.documentElement.style.setProperty('--secondary-blue', data.colors.secondary);
+                    if (document.getElementById('primaryColor')) {
+                        document.getElementById('primaryColor').value = data.colors.primary;
+                    }
+                    if (document.getElementById('secondaryColor')) {
+                        document.getElementById('secondaryColor').value = data.colors.secondary;
+                    }
+                }
+                
+                // Restore content with better matching
+                if (data.content && data.content.length > 0) {
+                    data.content.forEach(item => {
+                        let element = null;
+                        
+                        // Try to find element by ID first
+                        if (item.id) {
+                            element = document.getElementById(item.id);
+                        }
+                        
+                        // Then try by parent and index
+                        if (!element && item.parentId) {
+                            const parent = document.getElementById(item.parentId);
+                            if (parent) {
+                                const children = parent.querySelectorAll(item.tag);
+                                if (children[item.elementIndex]) {
+                                    element = children[item.elementIndex];
+                                }
+                            }
+                        }
+                        
+                        // Try by tag and global index
+                        if (!element) {
+                            const allElements = document.querySelectorAll(item.tag);
+                            if (allElements[item.globalIndex]) {
+                                element = allElements[item.globalIndex];
+                                // Verify it's not in admin panels
+                                if (element.closest('.admin-toolbar') || element.closest('.admin-panel')) {
+                                    element = null;
+                                }
+                            }
+                        }
+                        
+                        // Apply the saved content
+                        if (element) {
+                            element.innerHTML = item.html || item.text;
+                            console.log('Restored element:', item.tag, item.text.substring(0, 30));
+                        }
+                    });
+                }
+                
+                // Restore images
+                if (data.images && data.images.length > 0) {
+                    const allImages = document.querySelectorAll('img');
+                    data.images.forEach(imgData => {
+                        if (allImages[imgData.index]) {
+                            const img = allImages[imgData.index];
+                            if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel') && !img.src.includes('googlelogo')) {
+                                img.src = imgData.src;
+                                if (imgData.alt) img.alt = imgData.alt;
+                                console.log('Restored image:', imgData.index);
+                            }
+                        }
+                    });
+                }
+                
+                // Restore contact info
+                if (data.contact) {
+                    // Update all phone numbers
+                    document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                        if (!el.closest('.admin-panel')) {
+                            el.innerText = data.contact.phone;
+                            el.href = 'tel:+33' + data.contact.phone.replace(/\D/g, '');
+                        }
+                    });
+                    
+                    // Update admin panel inputs
+                    if (document.getElementById('adminPhone')) {
+                        document.getElementById('adminPhone').value = data.contact.phone;
+                    }
+                    if (document.getElementById('adminAddress')) {
+                        document.getElementById('adminAddress').value = data.contact.address;
+                    }
+                }
+                
+                console.log('Content loaded successfully!');
+                
+            } catch (e) {
+                console.error('Error loading saved content:', e);
+                showNotification('❌ Erreur lors du chargement des données');
+            }
+        }
+
+        // Reset changes
+        function resetChanges() {
+            if (confirm('Annuler toutes les modifications non sauvegardées?')) {
+                loadSavedContent();
+                showNotification('↩️ Modifications annulées');
+            }
+        }
+
+        // Reset to default
+        function resetToDefault() {
+            if (confirm('⚠️ ATTENTION: Cela supprimera TOUTES les modifications et restaurera le site original. Continuer?')) {
+                if (confirm('Êtes-vous vraiment sûr? Cette action est irréversible!')) {
+                    localStorage.removeItem('siteContent');
+                    location.reload();
+                }
+            }
+        }
+
+        // Toggle admin panel
+        function togglePanel() {
+            const panel = document.getElementById('adminPanel');
+            panel.classList.toggle('active');
+        }
+
+        // Update colors
+        function updateColors() {
+            const primary = document.getElementById('primaryColor').value;
+            const secondary = document.getElementById('secondaryColor').value;
+            document.documentElement.style.setProperty('--primary-blue', primary);
+            document.documentElement.style.setProperty('--secondary-blue', secondary);
+        }
+
+        // Image modal functions
+        function openImageModal() {
+            document.querySelector('.modal-overlay').classList.add('active');
+            document.querySelector('.image-upload-modal').classList.add('active');
+        }
+
+        function closeImageModal() {
+            document.querySelector('.modal-overlay').classList.remove('active');
+            document.querySelector('.image-upload-modal').classList.remove('active');
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('imageFile').value = '';
+        }
+
+        function applyImage() {
+            const urlInput = document.getElementById('imageUrl').value;
+            const fileInput = document.getElementById('imageFile');
+            
+            if (urlInput) {
+                currentEditingImage.src = urlInput;
+                closeImageModal();
+                showNotification('Image mise à jour!');
+            } else if (fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentEditingImage.src = e.target.result;
+                    closeImageModal();
+                    showNotification('Image mise à jour!');
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // Export data
+        function exportData() {
+            const data = localStorage.getItem('siteContent') || '{}';
+            const blob = new Blob([data], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'site-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            showNotification('📥 Données exportées avec succès!');
+        }
+
+        // Import data
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        localStorage.setItem('siteContent', JSON.stringify(data));
+                        loadSavedContent();
+                        showNotification('📤 Données importées avec succès!');
+                    } catch (error) {
+                        alert('Erreur lors de l\'importation du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('adminNotification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Existing site scripts (menu, carousel, etc.)
+        // Menu mobile
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuToggle.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Navigation fixe au scroll
+        const navbar = document.getElementById('navbar');
+        let lastScrollTop = 0;
+        
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > 100) {
+                navbar.classList.add('navbar-fixed');
+                document.body.classList.add('has-fixed-nav');
+            } else {
+                navbar.classList.remove('navbar-fixed');
+                document.body.classList.remove('has-fixed-nav');
+            }
+            
+            lastScrollTop = scrollTop;
+        });
+
+        // Carousel
+        let currentSlides = {
+            hero: 1,
+            about: 1
+        };
+
+        function showSlide(n, carouselType) {
+            const carousel = carouselType === 'hero' ? 
+                document.querySelector('#accueil .carousel-container') : 
+                document.querySelector('#apropos .carousel-container');
+            
+            const slides = carousel.querySelectorAll('.carousel-slide');
+            const dots = carousel.querySelectorAll('.carousel-dot');
+            
+            if (n > slides.length) currentSlides[carouselType] = 1;
+            if (n < 1) currentSlides[carouselType] = slides.length;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            slides[currentSlides[carouselType] - 1].classList.add('active');
+            dots[currentSlides[carouselType] - 1].classList.add('active');
+        }
+
+        function currentSlide(n, carouselType) {
+            currentSlides[carouselType] = n;
+            showSlide(n, carouselType);
+        }
+
+        // Auto-play carousel
+        setInterval(() => {
+            currentSlides.hero++;
+            showSlide(currentSlides.hero, 'hero');
+        }, 5000);
+
+        setInterval(() => {
+            currentSlides.about++;
+            showSlide(currentSlides.about, 'about');
+        }, 4000);
+
+        // Carte interactive
+        const map = L.map('map').setView([48.8566, 2.3522], 11);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Marqueur principal
+        const mainMarker = L.marker([48.8839, 2.3897]).addTo(map)
+            .bindPopup('<strong>RAS Plomberie</strong><br>31 rue du Maroc, 75019 Paris<br>📞 06 22 16 74 57');
+
+        // Zone de couverture
+        const circle = L.circle([48.8566, 2.3522], {
+            color: '#3b82f6',
+            fillColor: '#3b82f6',
+            fillOpacity: 0.1,
+            radius: 10000
+        }).addTo(map);
+
+        // Modal de contact
+        function openContactModal(service = '') {
+            document.getElementById('contactModal').classList.remove('hidden');
+            if (service) {
+                document.getElementById('serviceType').value = service;
+            }
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+        }
+
+        // Formulaires
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const message = `Nouvelle demande de devis:\n` +
+                `Nom: ${document.getElementById('name').value}\n` +
+                `Téléphone: ${document.getElementById('phone').value}\n` +
+                `Adresse: ${document.getElementById('address').value}\n` +
+                `Service: ${document.getElementById('service').value}\n` +
+                `Date: ${document.getElementById('date').value || 'Non spécifiée'}\n` +
+                `Heure: ${document.getElementById('time').value || 'Non spécifiée'}\n` +
+                `Message: ${document.getElementById('message').value || 'Aucun'}`;
+            
+            window.location.href = `sms:+33622167457?body=${encodeURIComponent(message)}`;
+            this.reset();
+            alert('Votre demande a été envoyée. Nous vous contacterons rapidement !');
+        });
+
+        document.getElementById('quickContactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            closeContactModal();
+            alert('Merci ! Nous vous rappellerons dans les plus brefs délais.');
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animation au scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.service-card, .testimonial-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
