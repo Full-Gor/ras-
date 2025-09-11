@@ -1909,8 +1909,10 @@
                 // Save contact info
                 await siteDataManager.updateContactInfo(savedData.contact);
                 
-                // Save all editable content
-                document.querySelectorAll('[contenteditable="true"]').forEach(async (el, index) => {
+                // Save all editable content (simplifié pour éviter les conflits)
+                const editableElements = document.querySelectorAll('[contenteditable="true"]');
+                for (let i = 0; i < editableElements.length; i++) {
+                    const el = editableElements[i];
                     const parent = el.parentElement;
                     const siblings = Array.from(parent.children);
                     const elementIndex = siblings.indexOf(el);
@@ -1923,8 +1925,12 @@
                         position_order: elementIndex
                     };
                     
-                    await siteDataManager.updateContent(`element_${index}`, contentData);
-                });
+                    try {
+                        await siteDataManager.updateContent(`element_${i}_${Date.now()}`, contentData);
+                    } catch (error) {
+                        console.warn('Erreur sauvegarde élément', i, error);
+                    }
+                }
                 
                 // Save images
                 document.querySelectorAll('img').forEach(async (img, index) => {
