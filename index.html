@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script type="module" src="supabase-client.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <!-- Google Fonts - 20 polices différentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1455,8 +1455,48 @@
             
             // Initialize Supabase
             try {
-                const { siteDataManager: manager } = await import('./supabase-client.js');
-                siteDataManager = manager;
+                // Create Supabase client directly
+                const supabaseUrl = 'https://owrmrifaepbeybffiobb.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93cm1yaWZhZXBiZXliZmZpb2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODUyNzYsImV4cCI6MjA3MzE2MTI3Nn0.mS9tbUXjIbIV1ydp2aXCwQGHgrYx';
+                
+                const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                siteDataManager = {
+                    supabase: supabase,
+                    updateColor: async (name, value) => {
+                        const { data, error } = await supabase
+                            .from('site_colors')
+                            .update({ color_value: value })
+                            .eq('color_name', name);
+                        if (error) throw error;
+                        return data;
+                    },
+                    updateContactInfo: async (info) => {
+                        const { data, error } = await supabase
+                            .from('contact_info')
+                            .upsert(info);
+                        if (error) throw error;
+                        return data;
+                    },
+                    updateContent: async (id, content) => {
+                        const { data, error } = await supabase
+                            .from('site_content')
+                            .upsert({ element_id: id, ...content });
+                        if (error) throw error;
+                        return data;
+                    },
+                    syncAllData: async () => {
+                        const [colors, content, contactInfo] = await Promise.all([
+                            supabase.from('site_colors').select('*'),
+                            supabase.from('site_content').select('*'),
+                            supabase.from('contact_info').select('*').limit(1)
+                        ]);
+                        return {
+                            colors: colors.data,
+                            content: content.data,
+                            contactInfo: contactInfo.data[0]
+                        };
+                    }
+                };
                 
                 // Load saved content from Supabase
                 await loadSavedContent();
