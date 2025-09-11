@@ -1,0 +1,30 @@
+{
+  "name": "ras-plomberie",
+  "version": "1.0.0",
+  "description": "Site web RAS Plomberie avec administration et synchronisation Supabase",
+  "main": "index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "db:migrate": "psql $DATABASE_URL -f database-schema.sql",
+    "db:reset": "psql $DATABASE_URL -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' && npm run db:migrate"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "plomberie",
+    "supabase",
+    "postgresql",
+    "admin",
+    "cms"
+  ],
+  "author": "RAS Plomberie",
+  "license": "MIT"
+}

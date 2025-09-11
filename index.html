@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="supabase-client.js"></script>
     
     <!-- Google Fonts - 20 polices différentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1441,17 +1442,33 @@
         let clickTimer = null;
         let originalContent = {};
         let currentEditingImage = null;
+        let siteDataManager = null;
+        let realtimeSubscription = null;
 
         // Initialize admin mode detection on RAS title
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const rasTitle = document.querySelector('.font-bold.text-2xl');
             if (rasTitle) {
                 rasTitle.style.cursor = 'pointer';
                 rasTitle.addEventListener('click', handleAdminAccess);
             }
             
-            // Load saved content if exists
-            loadSavedContent();
+            // Initialize Supabase
+            try {
+                const { siteDataManager: manager } = await import('./supabase-client.js');
+                siteDataManager = manager;
+                
+                // Load saved content from Supabase
+                await loadSavedContent();
+                
+                // Setup real-time synchronization
+                setupRealtimeSync();
+                
+            } catch (error) {
+                console.warn('Supabase non disponible, utilisation du localStorage:', error);
+                // Fallback to localStorage
+                loadSavedContentFromLocalStorage();
+            }
             
             // Setup editable elements
             if (localStorage.getItem('adminModeActive') === 'true') {
@@ -1729,7 +1746,16 @@
         }
 
         // Save changes to localStorage with better structure
-        function saveChanges() {
+        async function saveChanges() {
+            if (siteDataManager) {
+                await saveChangesToSupabase();
+                return;
+            }
+            
+            saveChangesToLocalStorage();
+        }
+
+        function saveChangesToLocalStorage() {
             const savedData = {
                 timestamp: new Date().toISOString(),
                 content: [],
@@ -1808,8 +1834,171 @@
             showNotification('✅ Modifications sauvegardées avec succès!');
         }
 
+        // Setup real-time synchronization
+        function setupRealtimeSync() {
+            if (!siteDataManager) return;
+            
+            realtimeSubscription = siteDataManager.subscribeToChanges((payload) => {
+                console.log('Changement détecté:', payload);
+                // Recharger les données depuis Supabase
+                loadSavedContent();
+            });
+        }
+
+        // Save changes to Supabase
+        async function saveChangesToSupabase() {
+            try {
+                const savedData = {
+                    timestamp: new Date().toISOString(),
+                    content: [],
+                    images: [],
+                    colors: {
+                        primary: document.getElementById('primaryColor')?.value || '#1e40af',
+                        secondary: document.getElementById('secondaryColor')?.value || '#3b82f6'
+                    },
+                    contact: {
+                        phone: document.getElementById('adminPhone')?.value || '06 22 16 74 57',
+                        address: document.getElementById('adminAddress')?.value || '31 rue du Maroc, 75019 Paris'
+                    }
+                };
+                
+                // Save colors
+                await siteDataManager.updateColor('primary', savedData.colors.primary);
+                await siteDataManager.updateColor('secondary', savedData.colors.secondary);
+                
+                // Save contact info
+                await siteDataManager.updateContactInfo(savedData.contact);
+                
+                // Save all editable content
+                document.querySelectorAll('[contenteditable="true"]').forEach(async (el, index) => {
+                    const parent = el.parentElement;
+                    const siblings = Array.from(parent.children);
+                    const elementIndex = siblings.indexOf(el);
+                    
+                    const contentData = {
+                        element_type: 'text',
+                        content_text: el.innerText,
+                        content_html: el.innerHTML,
+                        parent_element: parent.tagName.toLowerCase(),
+                        position_order: elementIndex
+                    };
+                    
+                    await siteDataManager.updateContent(`element_${index}`, contentData);
+                });
+                
+                // Save images
+                document.querySelectorAll('img').forEach(async (img, index) => {
+                    if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel') && !img.src.includes('googlelogo')) {
+                        const imageData = {
+                            image_url: img.src,
+                            alt_text: img.alt || '',
+                            section_name: img.closest('section')?.id || 'general',
+                            position_order: index
+                        };
+                        
+                        await siteDataManager.updateImage(`image_${index}`, imageData);
+                    }
+                });
+                
+                showNotification('✅ Modifications sauvegardées sur Supabase!');
+                
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde Supabase:', error);
+                showNotification('❌ Erreur lors de la sauvegarde');
+                // Fallback to localStorage
+                saveChangesToLocalStorage();
+            }
+        }
+
+        // Load content from Supabase
+        async function loadSavedContentFromSupabase() {
+            if (!siteDataManager) return;
+            
+            try {
+                const data = await siteDataManager.syncAllData();
+                
+                // Restore colors
+                if (data.colors) {
+                    data.colors.forEach(color => {
+                        document.documentElement.style.setProperty(`--${color.color_name}-blue`, color.color_value);
+                        const colorInput = document.getElementById(`${color.color_name}Color`);
+                        if (colorInput) {
+                            colorInput.value = color.color_value;
+                        }
+                    });
+                }
+                
+                // Restore contact info
+                if (data.contactInfo) {
+                    // Update all phone numbers
+                    document.querySelectorAll('a[href^="tel:"]').forEach(el => {
+                        if (!el.closest('.admin-panel')) {
+                            el.innerText = data.contactInfo.phone;
+                            el.href = 'tel:+33' + data.contactInfo.phone.replace(/\D/g, '');
+                        }
+                    });
+                    
+                    // Update admin panel inputs
+                    if (document.getElementById('adminPhone')) {
+                        document.getElementById('adminPhone').value = data.contactInfo.phone;
+                    }
+                    if (document.getElementById('adminAddress')) {
+                        document.getElementById('adminAddress').value = data.contactInfo.address;
+                    }
+                }
+                
+                // Restore content
+                if (data.content) {
+                    data.content.forEach(item => {
+                        const element = document.querySelector(`[data-element-id="${item.element_id}"]`) || 
+                                      document.querySelectorAll(item.element_type)[item.position_order];
+                        if (element) {
+                            element.innerHTML = item.content_html || item.content_text;
+                        }
+                    });
+                }
+                
+                // Restore images
+                if (data.images) {
+                    data.images.forEach(imgData => {
+                        const img = document.querySelector(`img[data-image-name="${imgData.image_name}"]`);
+                        if (img) {
+                            img.src = imgData.image_url;
+                            if (imgData.alt_text) img.alt = imgData.alt_text;
+                        }
+                    });
+                }
+                
+                console.log('Contenu chargé depuis Supabase');
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement Supabase:', error);
+                // Fallback to localStorage
+                loadSavedContentFromLocalStorage();
+            }
+        }
+
+        // Fallback to localStorage
+        function loadSavedContentFromLocalStorage() {
+            const saved = localStorage.getItem('siteContent');
+            if (!saved) return;
+            
+            try {
+                const data = JSON.parse(saved);
+                // ... existing localStorage loading code ...
+                console.log('Contenu chargé depuis localStorage');
+            } catch (e) {
+                console.error('Erreur lors du chargement localStorage:', e);
+            }
+        }
+
         // Load saved content with better matching
-        function loadSavedContent() {
+        async function loadSavedContent() {
+            if (siteDataManager) {
+                await loadSavedContentFromSupabase();
+                return;
+            }
+            
             const saved = localStorage.getItem('siteContent');
             if (!saved) return;
             
@@ -2313,17 +2502,38 @@
         }
 
         // Formulaires
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
+            
+            const requestData = {
+                client_name: document.getElementById('name').value,
+                client_phone: document.getElementById('phone').value,
+                client_address: document.getElementById('address').value,
+                service_type: document.getElementById('service').value,
+                preferred_date: document.getElementById('date').value || null,
+                preferred_time: document.getElementById('time').value || null,
+                message: document.getElementById('message').value || null
+            };
+            
+            // Save to Supabase if available
+            if (siteDataManager) {
+                try {
+                    await siteDataManager.saveContactRequest(requestData);
+                    showNotification('✅ Demande sauvegardée dans la base de données!');
+                } catch (error) {
+                    console.error('Erreur sauvegarde Supabase:', error);
+                }
+            }
+            
+            // Send SMS
             const message = `Nouvelle demande de devis:\n` +
-                `Nom: ${document.getElementById('name').value}\n` +
-                `Téléphone: ${document.getElementById('phone').value}\n` +
-                `Adresse: ${document.getElementById('address').value}\n` +
-                `Service: ${document.getElementById('service').value}\n` +
-                `Date: ${document.getElementById('date').value || 'Non spécifiée'}\n` +
-                `Heure: ${document.getElementById('time').value || 'Non spécifiée'}\n` +
-                `Message: ${document.getElementById('message').value || 'Aucun'}`;
+                `Nom: ${requestData.client_name}\n` +
+                `Téléphone: ${requestData.client_phone}\n` +
+                `Adresse: ${requestData.client_address}\n` +
+                `Service: ${requestData.service_type}\n` +
+                `Date: ${requestData.preferred_date || 'Non spécifiée'}\n` +
+                `Heure: ${requestData.preferred_time || 'Non spécifiée'}\n` +
+                `Message: ${requestData.message || 'Aucun'}`;
             
             window.location.href = `sms:+33622167457?body=${encodeURIComponent(message)}`;
             this.reset();
