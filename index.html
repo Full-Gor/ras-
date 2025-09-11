@@ -8,12 +8,65 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Google Fonts - 20 polices différentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Creepster&family=Nosifer&family=Butcherman&family=Chiller&family=Griffy&family=Kalam:wght@300;400;700&family=Permanent+Marker&family=Fredoka+One&family=Bungee&family=Righteous&family=Lobster&family=Pacifico&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Allura&family=Alex+Brush&family=MedievalSharp&family=Uncial+Antiqua&family=Cinzel:wght@400;600;700&family=UnifrakturMaguntia&family=Germania+One&family=Creepy&family=Spooky&family=Black+Ops+One&family=Audiowide&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&family=Aldrich&family=Share+Tech+Mono&family=Press+Start+2P&family=VT323&family=Source+Code+Pro:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #1e40af;
-            --secondary-blue: #3b82f6;
-            --accent-blue: #60a5fa;
-            --dark-blue: #1e293b;
+            /* Couleurs principales */
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --accent-color: #60a5fa;
+            --dark-color: #1e293b;
+            
+            /* Couleurs des titres */
+            --title-primary: #1e40af;
+            --title-secondary: #3b82f6;
+            --title-accent: #60a5fa;
+            --title-dark: #1e293b;
+            
+            /* Couleurs des textes */
+            --text-primary: #374151;
+            --text-secondary: #6b7280;
+            --text-light: #9ca3af;
+            --text-white: #ffffff;
+            
+            /* Couleurs des boutons */
+            --btn-primary: #1e40af;
+            --btn-secondary: #3b82f6;
+            --btn-accent: #60a5fa;
+            --btn-danger: #ef4444;
+            --btn-success: #10b981;
+            --btn-warning: #f59e0b;
+            
+            /* Couleurs des backgrounds */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-accent: #f3f4f6;
+            --bg-dark: #1e293b;
+            --bg-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            
+            /* Couleurs du header */
+            --header-bg: #1e40af;
+            --header-text: #ffffff;
+            --header-accent: #60a5fa;
+            
+            /* Couleurs du footer */
+            --footer-bg: #1e40af;
+            --footer-text: #ffffff;
+            --footer-accent: #60a5fa;
+            --footer-link: #93c5fd;
+            
+            /* Couleurs des cards */
+            --card-bg: #ffffff;
+            --card-border: #e5e7eb;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --card-hover: #f9fafb;
+            
+            /* Police actuelle */
+            --current-font: 'Inter', sans-serif;
         }
 
         /* Admin Mode Styles */
@@ -225,8 +278,81 @@
             scroll-behavior: smooth;
         }
 
+        /* Styles utilisant les variables CSS */
         .gradient-bg {
-            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            background: var(--bg-gradient);
+        }
+        
+        /* Styles des titres */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--title-primary);
+            font-family: var(--current-font);
+        }
+        
+        /* Styles des textes */
+        p, span, div {
+            color: var(--text-primary);
+            font-family: var(--current-font);
+        }
+        
+        /* Styles des boutons */
+        .btn-primary {
+            background-color: var(--btn-primary);
+            color: var(--text-white);
+        }
+        
+        .btn-secondary {
+            background-color: var(--btn-secondary);
+            color: var(--text-white);
+        }
+        
+        .btn-accent {
+            background-color: var(--btn-accent);
+            color: var(--text-white);
+        }
+        
+        /* Styles du header */
+        .navbar-fixed {
+            background: var(--header-bg);
+            color: var(--header-text);
+        }
+        
+        /* Styles du footer */
+        footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+        }
+        
+        footer a {
+            color: var(--footer-link);
+        }
+        
+        /* Styles des cards */
+        .service-card, .testimonial-card, .price-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 6px var(--card-shadow);
+        }
+        
+        .service-card:hover, .testimonial-card:hover, .price-card:hover {
+            background: var(--card-hover);
+        }
+        
+        /* Styles des backgrounds */
+        .bg-primary {
+            background-color: var(--bg-primary);
+        }
+        
+        .bg-secondary {
+            background-color: var(--bg-secondary);
+        }
+        
+        .bg-accent {
+            background-color: var(--bg-accent);
+        }
+        
+        .bg-dark {
+            background-color: var(--bg-dark);
         }
 
         .glass-effect {
@@ -435,15 +561,202 @@
             
             <div style="margin-bottom: 30px;">
                 <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🎨 Gestion des couleurs</h3>
+                
+                <!-- Couleurs principales -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs principales</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Principale</label>
+                            <input type="color" id="primaryColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Secondaire</label>
+                            <input type="color" id="secondaryColor" value="#3b82f6" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Accent</label>
+                            <input type="color" id="accentColor" value="#60a5fa" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Sombre</label>
+                            <input type="color" id="darkColor" value="#1e293b" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs des titres -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs des titres</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Titre principal</label>
+                            <input type="color" id="titlePrimaryColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Titre secondaire</label>
+                            <input type="color" id="titleSecondaryColor" value="#3b82f6" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs des textes -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs des textes</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Texte principal</label>
+                            <input type="color" id="textPrimaryColor" value="#374151" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Texte secondaire</label>
+                            <input type="color" id="textSecondaryColor" value="#6b7280" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs des boutons -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs des boutons</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Bouton principal</label>
+                            <input type="color" id="btnPrimaryColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Bouton secondaire</label>
+                            <input type="color" id="btnSecondaryColor" value="#3b82f6" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs des backgrounds -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs des backgrounds</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Background principal</label>
+                            <input type="color" id="bgPrimaryColor" value="#ffffff" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Background secondaire</label>
+                            <input type="color" id="bgSecondaryColor" value="#f9fafb" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs du header -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs du header</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Background header</label>
+                            <input type="color" id="headerBgColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Texte header</label>
+                            <input type="color" id="headerTextColor" value="#ffffff" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs du footer -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs du footer</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Background footer</label>
+                            <input type="color" id="footerBgColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Texte footer</label>
+                            <input type="color" id="footerTextColor" value="#ffffff" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Couleurs des cards -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #374151;">Couleurs des cards</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="font-size: 12px;">Background card</label>
+                            <input type="color" id="cardBgColor" value="#ffffff" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px;">Bordure card</label>
+                            <input type="color" id="cardBorderColor" value="#e5e7eb" onchange="updateColors()" style="width: 100%; height: 35px; border-radius: 6px; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">🔤 Gestion des polices</h3>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 14px; display: block; margin-bottom: 8px;">Choisir une police :</label>
+                    <select id="fontSelector" onchange="updateFont()" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                        <option value="Inter">Inter (Moderne)</option>
+                        <option value="Orbitron">Orbitron (Cyberpunk)</option>
+                        <option value="Creepster">Creepster (Horreur)</option>
+                        <option value="Nosifer">Nosifer (Gothique)</option>
+                        <option value="Butcherman">Butcherman (Effrayant)</option>
+                        <option value="Chiller">Chiller (Mystérieux)</option>
+                        <option value="Griffy">Griffy (Fantaisie)</option>
+                        <option value="Kalam">Kalam (Écriture main)</option>
+                        <option value="Permanent Marker">Permanent Marker (Marqueur)</option>
+                        <option value="Fredoka One">Fredoka One (Ludique)</option>
+                        <option value="Bungee">Bungee (Bold)</option>
+                        <option value="Righteous">Righteous (Élégant)</option>
+                        <option value="Lobster">Lobster (Script)</option>
+                        <option value="Pacifico">Pacifico (Décontracté)</option>
+                        <option value="Dancing Script">Dancing Script (Dansant)</option>
+                        <option value="Great Vibes">Great Vibes (Vintage)</option>
+                        <option value="Allura">Allura (Calligraphie)</option>
+                        <option value="Alex Brush">Alex Brush (Pinceau)</option>
+                        <option value="MedievalSharp">MedievalSharp (Médiéval)</option>
+                        <option value="Uncial Antiqua">Uncial Antiqua (Antique)</option>
+                        <option value="Cinzel">Cinzel (Classique)</option>
+                        <option value="UnifrakturMaguntia">UnifrakturMaguntia (Gothique)</option>
+                        <option value="Germania One">Germania One (Germanique)</option>
+                        <option value="Black Ops One">Black Ops One (Militaire)</option>
+                        <option value="Audiowide">Audiowide (Futuriste)</option>
+                        <option value="Rajdhani">Rajdhani (Techno)</option>
+                        <option value="Exo 2">Exo 2 (Sci-fi)</option>
+                        <option value="Aldrich">Aldrich (Minimaliste)</option>
+                        <option value="Share Tech Mono">Share Tech Mono (Monospace)</option>
+                        <option value="Press Start 2P">Press Start 2P (Rétro gaming)</option>
+                        <option value="VT323">VT323 (Terminal)</option>
+                        <option value="Source Code Pro">Source Code Pro (Code)</option>
+                        <option value="Fira Code">Fira Code (Développeur)</option>
+                    </select>
+                </div>
+                <div style="padding: 15px; background: #f3f4f6; border-radius: 8px; border: 2px dashed #d1d5db;">
+                    <p style="margin: 0; font-size: 14px; color: #6b7280;">Aperçu de la police :</p>
+                    <p id="fontPreview" style="margin: 10px 0 0 0; font-size: 18px; font-weight: bold; color: #1e40af;">RAS Plomberie - Services Professionnels</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 15px;">⭐ Configuration Google Reviews</h3>
                 <div style="display: grid; gap: 10px;">
                     <div>
-                        <label style="font-size: 14px;">Couleur principale</label>
-                        <input type="color" id="primaryColor" value="#1e40af" onchange="updateColors()" style="width: 100%; height: 40px; border-radius: 8px; cursor: pointer;">
+                        <label style="font-size: 14px;">API Key Google Places</label>
+                        <input type="text" id="googleApiKey" placeholder="Votre clé API Google Places" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
                     </div>
                     <div>
-                        <label style="font-size: 14px;">Couleur secondaire</label>
-                        <input type="color" id="secondaryColor" value="#3b82f6" onchange="updateColors()" style="width: 100%; height: 40px; border-radius: 8px; cursor: pointer;">
+                        <label style="font-size: 14px;">Place ID Google</label>
+                        <input type="text" id="googlePlaceId" placeholder="ID de votre établissement Google" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
                     </div>
+                    <div>
+                        <label style="font-size: 14px;">Note moyenne</label>
+                        <input type="number" id="googleRating" placeholder="4.8" step="0.1" min="0" max="5" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 14px;">Nombre d'avis</label>
+                        <input type="number" id="googleReviewCount" placeholder="127" style="width: 100%; padding: 10px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    </div>
+                    <button class="admin-btn" onclick="updateGoogleReviews()" style="width: 100%;">🔄 Mettre à jour les avis</button>
                 </div>
             </div>
 
@@ -1423,11 +1736,36 @@
                 images: [],
                 colors: {
                     primary: document.getElementById('primaryColor')?.value || '#1e40af',
-                    secondary: document.getElementById('secondaryColor')?.value || '#3b82f6'
+                    secondary: document.getElementById('secondaryColor')?.value || '#3b82f6',
+                    accent: document.getElementById('accentColor')?.value || '#60a5fa',
+                    dark: document.getElementById('darkColor')?.value || '#1e293b',
+                    titlePrimary: document.getElementById('titlePrimaryColor')?.value || '#1e40af',
+                    titleSecondary: document.getElementById('titleSecondaryColor')?.value || '#3b82f6',
+                    textPrimary: document.getElementById('textPrimaryColor')?.value || '#374151',
+                    textSecondary: document.getElementById('textSecondaryColor')?.value || '#6b7280',
+                    btnPrimary: document.getElementById('btnPrimaryColor')?.value || '#1e40af',
+                    btnSecondary: document.getElementById('btnSecondaryColor')?.value || '#3b82f6',
+                    bgPrimary: document.getElementById('bgPrimaryColor')?.value || '#ffffff',
+                    bgSecondary: document.getElementById('bgSecondaryColor')?.value || '#f9fafb',
+                    headerBg: document.getElementById('headerBgColor')?.value || '#1e40af',
+                    headerText: document.getElementById('headerTextColor')?.value || '#ffffff',
+                    footerBg: document.getElementById('footerBgColor')?.value || '#1e40af',
+                    footerText: document.getElementById('footerTextColor')?.value || '#ffffff',
+                    cardBg: document.getElementById('cardBgColor')?.value || '#ffffff',
+                    cardBorder: document.getElementById('cardBorderColor')?.value || '#e5e7eb'
+                },
+                font: {
+                    current: document.getElementById('fontSelector')?.value || 'Inter'
                 },
                 contact: {
                     phone: document.getElementById('adminPhone')?.value || '06 22 16 74 57',
                     address: document.getElementById('adminAddress')?.value || '31 rue du Maroc, 75019 Paris'
+                },
+                googleReviews: {
+                    apiKey: document.getElementById('googleApiKey')?.value || '',
+                    placeId: document.getElementById('googlePlaceId')?.value || '',
+                    rating: document.getElementById('googleRating')?.value || '4.8',
+                    reviewCount: document.getElementById('googleReviewCount')?.value || '127'
                 }
             };
             
@@ -1481,13 +1819,56 @@
                 
                 // Restore colors
                 if (data.colors) {
-                    document.documentElement.style.setProperty('--primary-blue', data.colors.primary);
-                    document.documentElement.style.setProperty('--secondary-blue', data.colors.secondary);
-                    if (document.getElementById('primaryColor')) {
-                        document.getElementById('primaryColor').value = data.colors.primary;
+                    // Restaurer toutes les variables CSS
+                    document.documentElement.style.setProperty('--primary-color', data.colors.primary);
+                    document.documentElement.style.setProperty('--secondary-color', data.colors.secondary);
+                    document.documentElement.style.setProperty('--accent-color', data.colors.accent);
+                    document.documentElement.style.setProperty('--dark-color', data.colors.dark);
+                    document.documentElement.style.setProperty('--title-primary', data.colors.titlePrimary);
+                    document.documentElement.style.setProperty('--title-secondary', data.colors.titleSecondary);
+                    document.documentElement.style.setProperty('--text-primary', data.colors.textPrimary);
+                    document.documentElement.style.setProperty('--text-secondary', data.colors.textSecondary);
+                    document.documentElement.style.setProperty('--btn-primary', data.colors.btnPrimary);
+                    document.documentElement.style.setProperty('--btn-secondary', data.colors.btnSecondary);
+                    document.documentElement.style.setProperty('--bg-primary', data.colors.bgPrimary);
+                    document.documentElement.style.setProperty('--bg-secondary', data.colors.bgSecondary);
+                    document.documentElement.style.setProperty('--header-bg', data.colors.headerBg);
+                    document.documentElement.style.setProperty('--header-text', data.colors.headerText);
+                    document.documentElement.style.setProperty('--footer-bg', data.colors.footerBg);
+                    document.documentElement.style.setProperty('--footer-text', data.colors.footerText);
+                    document.documentElement.style.setProperty('--card-bg', data.colors.cardBg);
+                    document.documentElement.style.setProperty('--card-border', data.colors.cardBorder);
+                    document.documentElement.style.setProperty('--bg-gradient', `linear-gradient(135deg, ${data.colors.primary} 0%, ${data.colors.secondary} 100%)`);
+                    
+                    // Restaurer les valeurs des inputs
+                    if (document.getElementById('primaryColor')) document.getElementById('primaryColor').value = data.colors.primary;
+                    if (document.getElementById('secondaryColor')) document.getElementById('secondaryColor').value = data.colors.secondary;
+                    if (document.getElementById('accentColor')) document.getElementById('accentColor').value = data.colors.accent;
+                    if (document.getElementById('darkColor')) document.getElementById('darkColor').value = data.colors.dark;
+                    if (document.getElementById('titlePrimaryColor')) document.getElementById('titlePrimaryColor').value = data.colors.titlePrimary;
+                    if (document.getElementById('titleSecondaryColor')) document.getElementById('titleSecondaryColor').value = data.colors.titleSecondary;
+                    if (document.getElementById('textPrimaryColor')) document.getElementById('textPrimaryColor').value = data.colors.textPrimary;
+                    if (document.getElementById('textSecondaryColor')) document.getElementById('textSecondaryColor').value = data.colors.textSecondary;
+                    if (document.getElementById('btnPrimaryColor')) document.getElementById('btnPrimaryColor').value = data.colors.btnPrimary;
+                    if (document.getElementById('btnSecondaryColor')) document.getElementById('btnSecondaryColor').value = data.colors.btnSecondary;
+                    if (document.getElementById('bgPrimaryColor')) document.getElementById('bgPrimaryColor').value = data.colors.bgPrimary;
+                    if (document.getElementById('bgSecondaryColor')) document.getElementById('bgSecondaryColor').value = data.colors.bgSecondary;
+                    if (document.getElementById('headerBgColor')) document.getElementById('headerBgColor').value = data.colors.headerBg;
+                    if (document.getElementById('headerTextColor')) document.getElementById('headerTextColor').value = data.colors.headerText;
+                    if (document.getElementById('footerBgColor')) document.getElementById('footerBgColor').value = data.colors.footerBg;
+                    if (document.getElementById('footerTextColor')) document.getElementById('footerTextColor').value = data.colors.footerText;
+                    if (document.getElementById('cardBgColor')) document.getElementById('cardBgColor').value = data.colors.cardBg;
+                    if (document.getElementById('cardBorderColor')) document.getElementById('cardBorderColor').value = data.colors.cardBorder;
+                }
+                
+                // Restore font
+                if (data.font) {
+                    document.documentElement.style.setProperty('--current-font', `'${data.font.current}', sans-serif`);
+                    if (document.getElementById('fontSelector')) {
+                        document.getElementById('fontSelector').value = data.font.current;
                     }
-                    if (document.getElementById('secondaryColor')) {
-                        document.getElementById('secondaryColor').value = data.colors.secondary;
+                    if (document.getElementById('fontPreview')) {
+                        document.getElementById('fontPreview').style.fontFamily = `'${data.font.current}', sans-serif`;
                     }
                 }
                 
@@ -1566,6 +1947,25 @@
                     }
                 }
                 
+                // Restore Google Reviews settings
+                if (data.googleReviews) {
+                    if (document.getElementById('googleApiKey')) {
+                        document.getElementById('googleApiKey').value = data.googleReviews.apiKey;
+                    }
+                    if (document.getElementById('googlePlaceId')) {
+                        document.getElementById('googlePlaceId').value = data.googleReviews.placeId;
+                    }
+                    if (document.getElementById('googleRating')) {
+                        document.getElementById('googleRating').value = data.googleReviews.rating;
+                    }
+                    if (document.getElementById('googleReviewCount')) {
+                        document.getElementById('googleReviewCount').value = data.googleReviews.reviewCount;
+                    }
+                    
+                    // Update the display
+                    updateReviewDisplay(data.googleReviews.rating, data.googleReviews.reviewCount);
+                }
+                
                 console.log('Content loaded successfully!');
                 
             } catch (e) {
@@ -1600,10 +2000,140 @@
 
         // Update colors
         function updateColors() {
+            // Couleurs principales
             const primary = document.getElementById('primaryColor').value;
             const secondary = document.getElementById('secondaryColor').value;
-            document.documentElement.style.setProperty('--primary-blue', primary);
-            document.documentElement.style.setProperty('--secondary-blue', secondary);
+            const accent = document.getElementById('accentColor').value;
+            const dark = document.getElementById('darkColor').value;
+            
+            // Couleurs des titres
+            const titlePrimary = document.getElementById('titlePrimaryColor').value;
+            const titleSecondary = document.getElementById('titleSecondaryColor').value;
+            
+            // Couleurs des textes
+            const textPrimary = document.getElementById('textPrimaryColor').value;
+            const textSecondary = document.getElementById('textSecondaryColor').value;
+            
+            // Couleurs des boutons
+            const btnPrimary = document.getElementById('btnPrimaryColor').value;
+            const btnSecondary = document.getElementById('btnSecondaryColor').value;
+            
+            // Couleurs des backgrounds
+            const bgPrimary = document.getElementById('bgPrimaryColor').value;
+            const bgSecondary = document.getElementById('bgSecondaryColor').value;
+            
+            // Couleurs du header
+            const headerBg = document.getElementById('headerBgColor').value;
+            const headerText = document.getElementById('headerTextColor').value;
+            
+            // Couleurs du footer
+            const footerBg = document.getElementById('footerBgColor').value;
+            const footerText = document.getElementById('footerTextColor').value;
+            
+            // Couleurs des cards
+            const cardBg = document.getElementById('cardBgColor').value;
+            const cardBorder = document.getElementById('cardBorderColor').value;
+            
+            // Mise à jour des variables CSS
+            document.documentElement.style.setProperty('--primary-color', primary);
+            document.documentElement.style.setProperty('--secondary-color', secondary);
+            document.documentElement.style.setProperty('--accent-color', accent);
+            document.documentElement.style.setProperty('--dark-color', dark);
+            
+            document.documentElement.style.setProperty('--title-primary', titlePrimary);
+            document.documentElement.style.setProperty('--title-secondary', titleSecondary);
+            
+            document.documentElement.style.setProperty('--text-primary', textPrimary);
+            document.documentElement.style.setProperty('--text-secondary', textSecondary);
+            
+            document.documentElement.style.setProperty('--btn-primary', btnPrimary);
+            document.documentElement.style.setProperty('--btn-secondary', btnSecondary);
+            
+            document.documentElement.style.setProperty('--bg-primary', bgPrimary);
+            document.documentElement.style.setProperty('--bg-secondary', bgSecondary);
+            
+            document.documentElement.style.setProperty('--header-bg', headerBg);
+            document.documentElement.style.setProperty('--header-text', headerText);
+            
+            document.documentElement.style.setProperty('--footer-bg', footerBg);
+            document.documentElement.style.setProperty('--footer-text', footerText);
+            
+            document.documentElement.style.setProperty('--card-bg', cardBg);
+            document.documentElement.style.setProperty('--card-border', cardBorder);
+            
+            // Mise à jour du gradient
+            document.documentElement.style.setProperty('--bg-gradient', `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`);
+        }
+
+        // Update font
+        function updateFont() {
+            const selectedFont = document.getElementById('fontSelector').value;
+            document.documentElement.style.setProperty('--current-font', `'${selectedFont}', sans-serif`);
+            
+            // Mise à jour de l'aperçu
+            const preview = document.getElementById('fontPreview');
+            preview.style.fontFamily = `'${selectedFont}', sans-serif`;
+            
+            showNotification(`✅ Police changée vers ${selectedFont}`);
+        }
+
+        // Update Google Reviews
+        function updateGoogleReviews() {
+            const apiKey = document.getElementById('googleApiKey').value;
+            const placeId = document.getElementById('googlePlaceId').value;
+            const rating = document.getElementById('googleRating').value;
+            const reviewCount = document.getElementById('googleReviewCount').value;
+            
+            if (apiKey && placeId) {
+                // Fetch real Google Reviews
+                fetchGoogleReviews(apiKey, placeId);
+            } else if (rating && reviewCount) {
+                // Update manual values
+                updateReviewDisplay(rating, reviewCount);
+            }
+            
+            showNotification('✅ Avis Google mis à jour!');
+        }
+
+        // Fetch Google Reviews from API
+        async function fetchGoogleReviews(apiKey, placeId) {
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=rating,user_ratings_total,reviews&key=${apiKey}`);
+                const data = await response.json();
+                
+                if (data.result) {
+                    const rating = data.result.rating;
+                    const totalReviews = data.result.user_ratings_total;
+                    
+                    // Update the display
+                    updateReviewDisplay(rating, totalReviews);
+                    
+                    // Update the admin panel
+                    document.getElementById('googleRating').value = rating;
+                    document.getElementById('googleReviewCount').value = totalReviews;
+                    
+                    showNotification('✅ Avis Google récupérés avec succès!');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération des avis:', error);
+                showNotification('❌ Erreur lors de la récupération des avis');
+            }
+        }
+
+        // Update review display on the site
+        function updateReviewDisplay(rating, reviewCount) {
+            // Update all rating displays
+            document.querySelectorAll('.google-rating .font-bold').forEach(el => {
+                if (el.textContent.includes('/5')) {
+                    el.textContent = `${rating}/5`;
+                }
+            });
+            
+            document.querySelectorAll('.google-rating .text-gray-500').forEach(el => {
+                if (el.textContent.includes('avis')) {
+                    el.textContent = `basé sur ${reviewCount} avis`;
+                }
+            });
         }
 
         // Image modal functions
