@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- Google Fonts - 20 polices différentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -981,7 +981,7 @@
                         <i class="fas fa-temperature-high"></i>
                     </div>
                     <h3 class="text-2xl font-bold mb-3 text-dark-blue">Chauffage & Climatisation</h3>
-                    <p class="text-gray-600 mb-6">Installation et entretien de chaudières, pompes à chaleur et systèmes de climatisation</p>
+                    <p class="text-gray-600 mb-6">Installation et entretien de chaudières</p>
                     <button onclick="openContactModal('Chauffage & Climatisation')" class="text-primary-blue hover:text-secondary-blue font-bold flex items-center group">
                         Nous contacter <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition"></i>
                     </button>
@@ -1035,15 +1035,15 @@
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <span><strong>Hauts-de-Seine (92)</strong> - Intervention sous 45 minutes</span>
+                                <span><strong>Hauts-de-Seine (92)</strong> - Intervention sous 30 minutes</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <span><strong>Seine-Saint-Denis (93)</strong> - Intervention sous 45 minutes</span>
+                                <span><strong>Seine-Saint-Denis (93)</strong> - Intervention sous 30 minutes</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <span><strong>Val-de-Marne (94)</strong> - Intervention sous 1 heure</span>
+                                <span><strong>Val-de-Marne (94)</strong> - Intervention sous 30 minutes</span>
                             </li>
                         </ul>
                     </div>
@@ -1462,6 +1462,8 @@
                 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
                 siteDataManager = {
                     supabase: supabase,
+                    
+                    // Gestion des couleurs
                     updateColor: async (name, value) => {
                         const { data, error } = await supabase
                             .from('site_colors')
@@ -1470,6 +1472,8 @@
                         if (error) throw error;
                         return data;
                     },
+                    
+                    // Gestion des infos contact
                     updateContactInfo: async (info) => {
                         const { data, error } = await supabase
                             .from('contact_info')
@@ -1477,6 +1481,8 @@
                         if (error) throw error;
                         return data;
                     },
+                    
+                    // Gestion du contenu
                     updateContent: async (id, content) => {
                         const { data, error } = await supabase
                             .from('site_content')
@@ -1484,17 +1490,82 @@
                         if (error) throw error;
                         return data;
                     },
+                    
+                    // Gestion des images
+                    updateImage: async (name, imageData) => {
+                        const { data, error } = await supabase
+                            .from('site_images')
+                            .upsert({ image_name: name, ...imageData });
+                        if (error) throw error;
+                        return data;
+                    },
+                    
+                    // Gestion des services
+                    updateService: async (id, serviceData) => {
+                        const { data, error } = await supabase
+                            .from('services')
+                            .update(serviceData)
+                            .eq('id', id);
+                        if (error) throw error;
+                        return data;
+                    },
+                    
+                    // Gestion des témoignages
+                    addTestimonial: async (testimonialData) => {
+                        const { data, error } = await supabase
+                            .from('testimonials')
+                            .insert(testimonialData);
+                        if (error) throw error;
+                        return data;
+                    },
+                    
+                    // Sauvegarde des demandes de contact
+                    saveContactRequest: async (requestData) => {
+                        const { data, error } = await supabase
+                            .from('contact_requests')
+                            .insert(requestData);
+                        if (error) throw error;
+                        return data;
+                    },
+                    
+                    // Synchronisation complète
                     syncAllData: async () => {
-                        const [colors, content, contactInfo] = await Promise.all([
+                        const [colors, content, images, contactInfo, services, testimonials] = await Promise.all([
                             supabase.from('site_colors').select('*'),
                             supabase.from('site_content').select('*'),
-                            supabase.from('contact_info').select('*').limit(1)
+                            supabase.from('site_images').select('*'),
+                            supabase.from('contact_info').select('*').limit(1),
+                            supabase.from('services').select('*'),
+                            supabase.from('testimonials').select('*')
                         ]);
                         return {
                             colors: colors.data,
                             content: content.data,
-                            contactInfo: contactInfo.data[0]
+                            images: images.data,
+                            contactInfo: contactInfo.data[0],
+                            services: services.data,
+                            testimonials: testimonials.data
                         };
+                    },
+                    
+                    // Synchronisation temps réel
+                    subscribeToChanges: (callback) => {
+                        const subscription = supabase
+                            .channel('site_changes')
+                            .on('postgres_changes', 
+                                { event: '*', schema: 'public', table: 'site_content' }, 
+                                callback
+                            )
+                            .on('postgres_changes', 
+                                { event: '*', schema: 'public', table: 'site_colors' }, 
+                                callback
+                            )
+                            .on('postgres_changes', 
+                                { event: '*', schema: 'public', table: 'contact_info' }, 
+                                callback
+                            )
+                            .subscribe();
+                        return subscription;
                     }
                 };
                 
@@ -1933,18 +2004,24 @@
                 }
                 
                 // Save images
-                document.querySelectorAll('img').forEach(async (img, index) => {
+                const images = document.querySelectorAll('img');
+                for (let i = 0; i < images.length; i++) {
+                    const img = images[i];
                     if (!img.closest('.admin-toolbar') && !img.closest('.admin-panel') && !img.src.includes('googlelogo')) {
                         const imageData = {
                             image_url: img.src,
                             alt_text: img.alt || '',
                             section_name: img.closest('section')?.id || 'general',
-                            position_order: index
+                            position_order: i
                         };
                         
-                        await siteDataManager.updateImage(`image_${index}`, imageData);
+                        try {
+                            await siteDataManager.updateImage(`image_${i}_${Date.now()}`, imageData);
+                        } catch (error) {
+                            console.warn('Erreur sauvegarde image', i, error);
+                        }
                     }
-                });
+                }
                 
                 showNotification('✅ Modifications sauvegardées sur Supabase!');
                 
@@ -2006,13 +2083,25 @@
                 
                 // Restore images
                 if (data.images) {
-                    data.images.forEach(imgData => {
-                        const img = document.querySelector(`img[data-image-name="${imgData.image_name}"]`);
-                        if (img) {
-                            img.src = imgData.image_url;
-                            if (imgData.alt_text) img.alt = imgData.alt_text;
+                    const allImages = document.querySelectorAll('img');
+                    data.images.forEach((imgData, index) => {
+                        if (allImages[index] && !allImages[index].closest('.admin-toolbar') && !allImages[index].closest('.admin-panel')) {
+                            allImages[index].src = imgData.image_url;
+                            if (imgData.alt_text) allImages[index].alt = imgData.alt_text;
                         }
                     });
+                }
+                
+                // Restore services
+                if (data.services) {
+                    // Mettre à jour les services si nécessaire
+                    console.log('Services chargés:', data.services.length);
+                }
+                
+                // Restore testimonials
+                if (data.testimonials) {
+                    // Mettre à jour les témoignages si nécessaire
+                    console.log('Témoignages chargés:', data.testimonials.length);
                 }
                 
                 console.log('Contenu chargé depuis Supabase');
